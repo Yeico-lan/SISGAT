@@ -1,86 +1,224 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<title>Moto Repuestos León</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOTO LEON RACING</title>
 
 <style>
-
-body{
-    background-color: #3f4652;
-    font-family: Arial;
-    text-align: center;
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-header{
-    background-color: #3f4652;
-    color: #FFD369;
+body {
+    display: flex;
+    background-color: #222831;
+    color: #fff;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    background-color: #393E46;
     padding: 20px;
 }
 
-h1{
-    font-size: 45px;
+/* Logo */
+.logo {
+    text-align: center;
+    margin-bottom: 25px;
 }
 
-h2{
+.logo img {
+    width: 100%;
+    max-width: 180px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.logo h2 {
     color: #FFD369;
+    font-size: 18px;
 }
 
-.logo img{
-    width: 200px;
-    margin: 20px;
+/* Menu */
+.sidebar ul {
+    list-style: none;
 }
 
-.opciones{
-    margin-top: 20px;
-}
-
-button{
-    background-color: #FFD369;
-    color: #3f4652;
-    padding: 12px 25px;
-    margin: 10px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
+.sidebar ul li {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: 0.3s;
 }
 
-button:hover{
-    background-color: #eeeeee;
+.sidebar ul li:hover {
+    background-color: #FFD369;
+    color: #222831;
 }
 
-footer{
-    background-color: #eeeeee;
-    padding: 15px;
-    margin-top: 40px;
+/* Main */
+.main {
+    flex: 1;
+    padding: 25px;
 }
 
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.user {
+    background-color: #FFD369;
+    color: #222831;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+/* Sections */
+.section {
+    display: none;
+}
+
+.active {
+    display: block;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #393E46;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #FFD369;
+    color: #222831;
+}
+
+tr:nth-child(even) {
+    background-color: #2f343c;
+}
 </style>
-
 </head>
 
 <body>
 
-<header>
-<h1>Moto Repuestos León</h1>
-</header>
+<div class="sidebar">
 
-<h2>Bienvenidos</h2>
+    <div class="logo">
+        <h2>MOTO LEON RACING</h2>
+        <img src="logo.png" alt="Moto Leon Racing">
+    </div>
 
-<div class="logo">
-<img src="logo.png">
+    <ul>
+        <li onclick="showSection('clientes')">👤 Clientes</li>
+        <li onclick="showSection('motos')">🏍️ Motos</li>
+        <li onclick="showSection('productos')">📦 Productos</li>
+        <li onclick="showSection('proveedores')">🚚 Proveedores</li>
+    </ul>
 </div>
 
-<div class="opciones">
-<button>Usuarios</button>
-<button>Inventario</button>
-<button>Ventas</button>
+<div class="main">
+
+    <div class="header">
+        <h1>Panel Principal</h1>
+        <div class="user">Administrador</div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div id="clientes" class="section active">
+        <h2>Clientes</h2><br>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>Juan Pérez</td>
+                <td>3001234567</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- MOTOS -->
+    <div id="motos" class="section">
+        <h2>Motos</h2><br>
+        <table>
+            <tr>
+                <th>Placa</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+            </tr>
+            <tr>
+                <td>ABC123</td>
+                <td>Yamaha</td>
+                <td>FZ</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div id="productos" class="section">
+        <h2>Productos</h2><br>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>Aceite</td>
+                <td>$40.000</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- PROVEEDORES -->
+    <div id="proveedores" class="section">
+        <h2>Proveedores</h2><br>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>Repuestos S.A</td>
+                <td>3019876543</td>
+            </tr>
+        </table>
+    </div>
+
 </div>
 
-<footer>
-Sistema de gestión - Moto Repuestos León
-</footer>
+<script>
+function showSection(sectionId) {
+    let sections = document.querySelectorAll('.section');
+    sections.forEach(sec => sec.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+}
+</script>
 
 </body>
 </html>
