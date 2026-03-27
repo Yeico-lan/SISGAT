@@ -5,220 +5,159 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MOTO LEON RACING</title>
 
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          bg: '#1a1c22',
+          card: '#24272f',
+          side: '#1e2028',
+          accent: '#FFD369',
+          muted: '#9399a6'
+        }
+      },
+      fontFamily: {
+        display: ['Rajdhani', 'sans-serif'],
+        body: ['Nunito', 'sans-serif']
+      }
+    }
+  }
+}
+</script>
+
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-body {
-    display: flex;
-    background-color: #222831;
-    color: #fff;
-}
-
-/* Sidebar */
-.sidebar {
-    width: 240px;
-    height: 100vh;
-    background-color: #393E46;
-    padding: 20px;
-}
-
-/* Logo */
-.logo {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.logo img {
-    width: 100%;
-    max-width: 180px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-.logo h2 {
-    color: #FFD369;
-    font-size: 18px;
-}
-
-/* Menu */
-.sidebar ul {
-    list-style: none;
-}
-
-.sidebar ul li {
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.sidebar ul li:hover {
-    background-color: #FFD369;
-    color: #222831;
-}
-
-/* Main */
-.main {
-    flex: 1;
-    padding: 25px;
-}
-
-/* Header */
-.header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 25px;
-}
-
-.user {
-    background-color: #FFD369;
-    color: #222831;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-weight: bold;
-}
-
-/* Sections */
-.section {
-    display: none;
-}
-
-.active {
-    display: block;
-}
-
-/* Table */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #393E46;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-th, td {
-    padding: 12px;
-    text-align: left;
-}
-
-th {
-    background-color: #FFD369;
-    color: #222831;
-}
-
-tr:nth-child(even) {
-    background-color: #2f343c;
-}
+body { background-color: #1a1c22; font-family: 'Nunito', sans-serif; }
 </style>
 </head>
 
-<body>
+<body class="text-white flex min-h-screen">
 
-<div class="sidebar">
+<!-- SIDEBAR -->
+<aside class="w-60 bg-brand-side flex flex-col p-6">
 
-    <div class="logo">
-        <h2>MOTO LEON RACING</h2>
-        <img src="logo.png" alt="Moto Leon Racing">
+  <div class="text-center mb-10">
+    <div class="w-16 h-16 mx-auto bg-yellow-400 rounded-full flex items-center justify-center text-3xl mb-3">
+      🏍️
+    </div>
+    <h2 class="font-display text-xl text-yellow-400 font-bold">MOTO LEON</h2>
+    <p class="text-xs text-gray-400">RACING PANEL</p>
+  </div>
+
+  <div class="bg-yellow-400 text-black px-4 py-3 rounded-xl font-bold text-center">
+    🏠 Dashboard
+  </div>
+
+  <div class="mt-auto text-center text-xs text-gray-500">
+    v1.0 © 2025
+  </div>
+
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 p-8">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-display font-bold">Panel Principal</h1>
+      <p class="text-sm text-gray-400">Actividad reciente del sistema</p>
     </div>
 
-    <ul>
-        <li onclick="showSection('clientes')">👤 Clientes</li>
-        <li onclick="showSection('motos')">🏍️ Motos</li>
-        <li onclick="showSection('productos')">📦 Productos</li>
-        <li onclick="showSection('proveedores')">🚚 Proveedores</li>
-    </ul>
-</div>
+    <div class="bg-yellow-400 text-black px-4 py-2 rounded-full font-bold">
+      👑 Administrador
+    </div>
+  </div>
 
-<div class="main">
+  <!-- CARDS -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
-    <div class="header">
-        <h1>Panel Principal</h1>
-        <div class="user">Administrador</div>
+    <div class="bg-brand-card p-6 rounded-2xl">
+      <p class="text-xs text-gray-400">CLIENTES</p>
+      <p class="text-4xl font-display text-yellow-400 font-bold">12</p>
     </div>
 
-    <!-- CLIENTES -->
-    <div id="clientes" class="section active">
-        <h2>Clientes</h2><br>
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Teléfono</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td>Juan Pérez</td>
-                <td>3001234567</td>
-            </tr>
-        </table>
+    <div class="bg-brand-card p-6 rounded-2xl">
+      <p class="text-xs text-gray-400">MOTOS</p>
+      <p class="text-4xl font-display text-yellow-400 font-bold">8</p>
     </div>
 
-    <!-- MOTOS -->
-    <div id="motos" class="section">
-        <h2>Motos</h2><br>
-        <table>
-            <tr>
-                <th>Placa</th>
-                <th>Marca</th>
-                <th>Modelo</th>
-            </tr>
-            <tr>
-                <td>ABC123</td>
-                <td>Yamaha</td>
-                <td>FZ</td>
-            </tr>
-        </table>
+    <div class="bg-brand-card p-6 rounded-2xl">
+      <p class="text-xs text-gray-400">PRODUCTOS</p>
+      <p class="text-4xl font-display text-yellow-400 font-bold">25</p>
     </div>
 
-    <!-- PRODUCTOS -->
-    <div id="productos" class="section">
-        <h2>Productos</h2><br>
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Precio</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td>Aceite</td>
-                <td>$40.000</td>
-            </tr>
-        </table>
+    <div class="bg-brand-card p-6 rounded-2xl">
+      <p class="text-xs text-gray-400">PROVEEDORES</p>
+      <p class="text-4xl font-display text-yellow-400 font-bold">5</p>
     </div>
 
-    <!-- PROVEEDORES -->
-    <div id="proveedores" class="section">
-        <h2>Proveedores</h2><br>
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Teléfono</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td>Repuestos S.A</td>
-                <td>3019876543</td>
-            </tr>
-        </table>
+  </div>
+
+  <!-- NOTICIAS -->
+  <div class="grid lg:grid-cols-2 gap-6">
+
+    <!-- ACTIVIDAD -->
+    <div class="bg-brand-card p-6 rounded-2xl">
+      <h3 class="text-xl font-display font-bold mb-4">📢 Actividad reciente</h3>
+
+      <div class="space-y-4 text-sm">
+
+        <div class="flex justify-between">
+          <span>🏍️ Nueva moto registrada</span>
+          <span class="text-gray-400">Hace 2 min</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>👤 Nuevo cliente agregado</span>
+          <span class="text-gray-400">Hace 10 min</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>📦 Producto actualizado</span>
+          <span class="text-gray-400">Hace 1 hora</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>🚚 Nuevo proveedor añadido</span>
+          <span class="text-gray-400">Hoy</span>
+        </div>
+
+      </div>
     </div>
 
-</div>
+    <!-- ÚLTIMOS REGISTROS -->
+    <div class="bg-brand-card p-6 rounded-2xl">
+      <h3 class="text-xl font-display font-bold mb-4">🆕 Últimos registros</h3>
 
-<script>
-function showSection(sectionId) {
-    let sections = document.querySelectorAll('.section');
-    sections.forEach(sec => sec.classList.remove('active'));
-    document.getElementById(sectionId).classList.add('active');
-}
-</script>
+      <div class="space-y-4 text-sm">
+
+        <div>
+          <p class="text-yellow-400 font-bold">Última moto</p>
+          <p>Yamaha FZ 150 - 2023</p>
+        </div>
+
+        <div>
+          <p class="text-yellow-400 font-bold">Último cliente</p>
+          <p>Carlos Ramírez</p>
+        </div>
+
+        <div>
+          <p class="text-yellow-400 font-bold">Producto reciente</p>
+          <p>Aceite Motul 5100</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</main>
 
 </body>
 </html>
