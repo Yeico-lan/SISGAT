@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOTO LEON RACING — Movimientos</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg:      '#222831',
+          surface: '#393E46',
+          gold:    '#FFD369',
+          muted:   '#8b8fa8',
+        },
+        fontFamily: {
+          bebas:    ['"Bebas Neue"', 'sans-serif'],
+          rajdhani: ['Rajdhani', 'sans-serif'],
+        },
+        keyframes: {
+          gridMove:  { '0%': { backgroundPosition:'0 0' }, '100%': { backgroundPosition:'48px 48px' } },
+          pulseglow: { '0%,100%': { opacity:'1', transform:'translate(-50%,-50%) scale(1)' }, '50%': { opacity:'.6', transform:'translate(-50%,-50%) scale(1.12)' } },
+          slideUp:   { '0%': { opacity:'0', transform:'translateY(24px)' }, '100%': { opacity:'1', transform:'translateY(0)' } },
+          modalIn:   { '0%': { opacity:'0', transform:'scale(.96) translateY(16px)' }, '100%': { opacity:'1', transform:'scale(1) translateY(0)' } },
+          shake:     { '0%,100%': { transform:'translateX(0)' }, '25%': { transform:'translateX(-6px)' }, '75%': { transform:'translateX(6px)' } },
+          toastIn:   { '0%': { opacity:'0', transform:'translateY(16px)' }, '100%': { opacity:'1', transform:'translateY(0)' } },
+        },
+        animation: {
+          gridMove:  'gridMove 18s linear infinite',
+          pulseglow: 'pulseglow 4s ease-in-out infinite',
+          slideUp:   'slideUp .5s cubic-bezier(.22,.6,.36,1) both',
+          modalIn:   'modalIn .3s cubic-bezier(.22,.6,.36,1) both',
+          shake:     'shake .35s ease',
+          toastIn:   'toastIn .4s cubic-bezier(.22,.6,.36,1) both',
+        },
+      },
+    },
+  }
+</script>
+
+<style>
+  body { font-family:'Rajdhani',sans-serif; }
+
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(255,211,105,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,211,105,.06) 1px, transparent 1px);
+    background-size:48px 48px;
+    animation:gridMove 18s linear infinite;
+    pointer-events:none; z-index:0;
+  }
+
+  body::after {
+    content:'';
+    position:fixed;
+    width:600px; height:600px;
+    background:radial-gradient(circle, rgba(255,211,105,.10) 0%, transparent 70%);
+    top:45%; left:50%;
+    pointer-events:none; z-index:0;
+    animation:pulseglow 4s ease-in-out infinite;
+  }
+
+  .divider { height:1px; background:linear-gradient(90deg, transparent, rgba(255,211,105,.3), transparent); }
+
+  .field-input { transition:border-color .2s, box-shadow .2s; }
+  .field-input:focus {
+    outline:none;
+    border-color:#FFD369;
+    box-shadow:0 0 0 3px rgba(255,211,105,.12);
+  }
+  .field-wrap:focus-within .field-icon { stroke:#FFD369; }
+
+  .btn-gold { position:relative; overflow:hidden; }
+  .btn-gold::before {
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);
+    opacity:0; transition:opacity .2s; border-radius:10px;
+  }
+  .btn-gold:hover::before { opacity:1; }
+
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-track { background:#222831; }
+  ::-webkit-scrollbar-thumb { background:rgba(255,211,105,.25); border-radius:9px; }
+  ::-webkit-scrollbar-thumb:hover { background:rgba(255,211,105,.45); }
+
+  .mov-row td { transition:background .12s; }
+  .mov-row:hover td { background:rgba(255,211,105,.03); }
+
+  #modal-overlay { backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
+
+  .tipo-btn { transition:all .15s; }
+
+  .tab-filter { transition:all .15s; }
+  .tab-filter.tab-active              { background:rgba(255,211,105,.12); border-color:rgba(255,211,105,.5); color:#FFD369; }
+  .tab-filter.tab-active.tab-entrada  { background:rgba(74,222,128,.10);  border-color:#4ade80; color:#4ade80; }
+  .tab-filter.tab-active.tab-salida   { background:rgba(248,113,113,.10); border-color:#f87171; color:#f87171; }
+  .tab-filter.tab-active.tab-dev      { background:rgba(251,146,60,.10);  border-color:#fb923c; color:#fb923c; }
+</style>
+</head>
+
+<body class="min-h-screen bg-bg text-white overflow-x-hidden relative">
+
+<!-- NAVBAR -->
+<nav class="relative z-20 bg-surface border-b border-gold/15 shadow-[0_2px_24px_rgba(0,0,0,.45)]">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+
+    <div class="flex items-center gap-3 shrink-0">
+      <div class="w-10 h-10 bg-gold rounded-xl flex items-center justify-center shadow-[0_4px_16px_rgba(255,211,105,.35)]">
+        <svg viewBox="0 0 24 24" class="w-[22px] h-[22px]" fill="none" stroke="#222831" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm11 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0zM2 9l2-4h9l3 4M7 9l1-4M13 9l2-4M2 9h20M9 13l3-4 3 4"/>
+        </svg>
+      </div>
+      <div>
+        <p class="font-bebas text-gold text-[18px] tracking-[3px] leading-none">MOTO LEON RACING</p>
+        <p class="text-[10px] text-muted tracking-[2px] uppercase">Sistema de Gestión</p>
+      </div>
+    </div>
+
+    <div class="hidden md:flex items-center gap-1">
+      <a href="#" class="px-4 py-2 rounded-lg text-[13px] font-semibold tracking-[1px] uppercase text-muted hover:text-gold hover:bg-gold/5 transition-all duration-150">Dashboard</a>
+      <a href="#" class="px-4 py-2 rounded-lg text-[13px] font-semibold tracking-[1px] uppercase text-muted hover:text-gold hover:bg-gold/5 transition-all duration-150">Productos</a>
+      <a href="#" class="px-4 py-2 rounded-lg text-[13px] font-semibold tracking-[1px] uppercase bg-gold/10 text-gold border border-gold/30">Movimientos</a>
+      <a href="#" class="px-4 py-2 rounded-lg text-[13px] font-semibold tracking-[1px] uppercase text-muted hover:text-gold hover:bg-gold/5 transition-all duration-150">Reportes</a>
+    </div>
+
+    <div class="flex items-center gap-3 shrink-0">
+      <div class="text-right hidden sm:block">
+        <p class="text-[13px] font-semibold text-white">Administrador</p>
+        <p class="text-[10px] text-muted tracking-[1px] uppercase">En línea</p>
+      </div>
+      <div class="w-9 h-9 bg-gold/15 border border-gold/25 rounded-full flex items-center justify-center">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#FFD369" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 animate-slideUp">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+    <div>
+      <h1 class="font-bebas text-[32px] tracking-[4px] text-gold leading-none">Movimientos</h1>
+      <p class="text-[12px] text-muted tracking-[2px] uppercase mt-1">Control de entradas, salidas y devoluciones</p>
+    </div>
+    <button onclick="abrirModal()"
+            class="btn-gold flex items-center gap-2 bg-gold text-bg font-bebas text-[15px] tracking-[2px]
+                   px-6 py-3 rounded-[10px] border-none cursor-pointer
+                   shadow-[0_8px_24px_rgba(255,211,105,.3)]
+                   hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(255,211,105,.4)]
+                   active:translate-y-0 transition-all duration-150">
+      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#222831" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Nuevo Movimiento
+    </button>
+  </div>
+
+  <div class="divider mb-7"></div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-7">
+    <div class="bg-surface rounded-[14px] border border-gold/10 px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,.3)]">
+      <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold mb-1">Total Movimientos</p>
+      <p class="font-bebas text-[32px] tracking-[2px] text-gold leading-none" id="stat-total">0</p>
+      <p class="text-[11px] text-muted mt-1">registros</p>
+    </div>
+    <div class="bg-surface rounded-[14px] border border-green-500/15 px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,.3)]">
+      <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold mb-1">Entradas</p>
+      <p class="font-bebas text-[32px] tracking-[2px] text-green-400 leading-none" id="stat-entradas">0</p>
+      <p class="text-[11px] text-muted mt-1">ingresos de producto</p>
+    </div>
+    <div class="bg-surface rounded-[14px] border border-red-500/15 px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,.3)]">
+      <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold mb-1">Salidas</p>
+      <p class="font-bebas text-[32px] tracking-[2px] text-red-400 leading-none" id="stat-salidas">0</p>
+      <p class="text-[11px] text-muted mt-1">despachos realizados</p>
+    </div>
+    <div class="bg-surface rounded-[14px] border border-orange-400/15 px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,.3)]">
+      <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold mb-1">Devoluciones</p>
+      <p class="font-bebas text-[32px] tracking-[2px] text-orange-400 leading-none" id="stat-devoluciones">0</p>
+      <p class="text-[11px] text-muted mt-1">retornos procesados</p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-surface rounded-[16px] border border-gold/10 shadow-[0_4px_32px_rgba(0,0,0,.35)] mb-5 overflow-hidden">
+    <div class="px-5 pt-5 pb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between border-b border-white/5">
+      <div class="field-wrap relative flex-1 max-w-sm">
+        <input type="text" id="search-input" placeholder="Buscar producto, ID…" oninput="filtrar()"
+               class="field-input w-full pl-[40px] pr-4 py-[11px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
+        <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200"
+             viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </div>
+      <div class="field-wrap relative">
+        <input type="date" id="filter-date" onchange="filtrar()"
+               class="field-input pl-[40px] pr-4 py-[11px] bg-bg border border-gold/15 rounded-[10px] text-muted font-rajdhani text-[13px] cursor-pointer"/>
+        <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200"
+             viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+        </svg>
+      </div>
+      <button onclick="limpiarFiltros()" class="text-[12px] tracking-[1px] uppercase text-muted hover:text-gold transition-colors duration-150 font-semibold cursor-pointer bg-transparent border-none">Limpiar</button>
+    </div>
+
+    <div class="flex items-center gap-2 px-5 py-3 flex-wrap">
+      <span class="text-[10px] tracking-[2px] uppercase text-muted font-semibold mr-1">Tipo:</span>
+      <button onclick="setTab('todos')" id="tab-todos"
+              class="tab-filter tab-active px-4 py-1.5 rounded-lg border border-white/10 text-[12px] font-semibold tracking-[1px] uppercase text-muted cursor-pointer bg-transparent">Todos</button>
+      <button onclick="setTab('ENTRADA')" id="tab-ENTRADA"
+              class="tab-filter tab-entrada px-4 py-1.5 rounded-lg border border-white/10 text-[12px] font-semibold tracking-[1px] uppercase text-muted cursor-pointer bg-transparent">Entrada</button>
+      <button onclick="setTab('SALIDA')" id="tab-SALIDA"
+              class="tab-filter tab-salida px-4 py-1.5 rounded-lg border border-white/10 text-[12px] font-semibold tracking-[1px] uppercase text-muted cursor-pointer bg-transparent">Salida</button>
+      <button onclick="setTab('DEVOLUCION')" id="tab-DEVOLUCION"
+              class="tab-filter tab-dev px-4 py-1.5 rounded-lg border border-white/10 text-[12px] font-semibold tracking-[1px] uppercase text-muted cursor-pointer bg-transparent">Devolución</button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-surface rounded-[16px] border border-gold/10 shadow-[0_4px_32px_rgba(0,0,0,.35)] overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-[14px]" style="min-width:760px;">
+        <thead>
+          <tr class="border-b border-white/8">
+            <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">ID Mov.</th>
+            <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Fecha</th>
+            <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Tipo</th>
+            <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">ID Detalle</th>
+            <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Producto</th>
+            <th class="px-5 py-4 text-center text-[10px] tracking-[2px] uppercase text-muted font-semibold">Cant.</th>
+            <th class="px-5 py-4 text-right text-[10px] tracking-[2px] uppercase text-muted font-semibold">Precio Unit.</th>
+            <th class="px-5 py-4 text-right text-[10px] tracking-[2px] uppercase text-muted font-semibold">Subtotal</th>
+            <th class="px-5 py-4 text-center text-[10px] tracking-[2px] uppercase text-muted font-semibold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="hidden text-center py-16 px-6">
+      <div class="w-14 h-14 bg-gold/8 rounded-full flex items-center justify-center mx-auto mb-4 border border-gold/15">
+        <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="#8b8fa8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 13V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7"/><path d="M20 13l-8 5-8-5"/>
+        </svg>
+      </div>
+      <p class="font-bebas text-[20px] tracking-[3px] text-muted">SIN RESULTADOS</p>
+      <p class="text-[12px] text-muted/60 tracking-[1px] mt-1">No hay movimientos que coincidan con el filtro</p>
+    </div>
+
+    <!-- Footer tabla -->
+    <div class="border-t border-white/5 px-5 py-3 flex items-center justify-between">
+      <p class="text-[12px] text-muted" id="tabla-info">0 registros</p>
+      <p class="text-[12px] text-muted font-semibold">
+        Total: <span class="text-gold font-bebas text-[15px] tracking-[1px]" id="total-general">$ 0</span>
+      </p>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center px-4 hidden" style="background:rgba(0,0,0,.72);">
+  <div class="bg-surface w-full max-w-[490px] rounded-[18px] border border-gold/15
+              shadow-[0_0_0_1px_rgba(255,211,105,.06),0_32px_80px_rgba(0,0,0,.6)]
+              px-8 pt-8 pb-7 animate-modalIn">
+
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="font-bebas text-[22px] tracking-[3px] text-gold leading-none">Nuevo Movimiento</h2>
+        <p class="text-[11px] text-muted tracking-[1.5px] uppercase mt-0.5">Registrar entrada, salida o devolución</p>
+      </div>
+      <button onclick="cerrarModal()"
+              class="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10
+                     text-muted hover:text-gold hover:border-gold/30 transition-all duration-150 cursor-pointer bg-transparent">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="divider mb-6"></div>
+
+    <!-- Selector tipo -->
+    <div class="mb-5">
+      <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-3 font-semibold">Tipo de Movimiento</label>
+      <div class="grid grid-cols-3 gap-2">
+        <button type="button" onclick="selTipo('ENTRADA')" id="tipo-ENTRADA"
+                class="tipo-btn border border-white/10 bg-bg rounded-[10px] py-3 text-[12px] font-bold tracking-[1px] uppercase text-muted cursor-pointer flex flex-col items-center gap-1.5">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          Entrada
+        </button>
+        <button type="button" onclick="selTipo('SALIDA')" id="tipo-SALIDA"
+                class="tipo-btn border border-white/10 bg-bg rounded-[10px] py-3 text-[12px] font-bold tracking-[1px] uppercase text-muted cursor-pointer flex flex-col items-center gap-1.5">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          Salida
+        </button>
+        <button type="button" onclick="selTipo('DEVOLUCION')" id="tipo-DEVOLUCION"
+                class="tipo-btn border border-white/10 bg-bg rounded-[10px] py-3 text-[12px] font-bold tracking-[1px] uppercase text-muted cursor-pointer flex flex-col items-center gap-1.5">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M9 6l-6 6 6 6"/></svg>
+          Devolución
+        </button>
+      </div>
+    </div>
+
+    <!-- Campos -->
+    <div class="grid grid-cols-2 gap-4 mb-4">
+
+      <div class="col-span-2">
+        <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">Producto</label>
+        <div class="field-wrap relative">
+          <input type="text" id="f-producto" placeholder="Nombre del producto"
+                 class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[15px] font-medium"/>
+          <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200"
+               viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">Fecha</label>
+        <div class="field-wrap relative">
+          <input type="date" id="f-fecha"
+                 class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium cursor-pointer"/>
+          <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200"
+               viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">ID Detalle</label>
+        <div class="field-wrap relative">
+          <input type="number" id="f-deta" placeholder="001" min="1"
+                 class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
+          <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200"
+               viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/>
+          </svg>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">Cantidad</label>
+        <div class="field-wrap relative">
+          <input type="number" id="f-cantidad" placeholder="0" min="1" oninput="calcSubtotal()"
+                 class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
+          <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200"
+               viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">Precio Unitario</label>
+        <div class="field-wrap relative">
+          <input type="number" id="f-precio" placeholder="0.00" min="0" step="0.01" oninput="calcSubtotal()"
+                 class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
+          <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200"
+               viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Preview subtotal -->
+    <div class="bg-bg border border-gold/15 rounded-[10px] px-5 py-3 mb-5 flex items-center justify-between">
+      <div>
+        <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold">Subtotal calculado</p>
+        <p class="text-[11px] text-muted/60 mt-0.5">Cantidad × Precio unitario</p>
+      </div>
+      <p class="font-bebas text-[24px] tracking-[2px] text-gold" id="preview-subtotal">$ 0.00</p>
+    </div>
+
+    <!-- Error -->
+    <div id="modal-error" class="hidden mb-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-[10px] text-[13px] text-red-300 text-center font-semibold tracking-[0.5px]">
+      ⚠️ Completa todos los campos y selecciona el tipo
+    </div>
+
+    <!-- Botones -->
+    <div class="flex gap-3">
+      <button onclick="cerrarModal()"
+              class="flex-1 py-[13px] bg-transparent border border-white/10 text-muted rounded-[10px]
+                     font-bebas text-[15px] tracking-[2px] cursor-pointer
+                     hover:border-gold/25 hover:text-white transition-all duration-150">
+        Cancelar
+      </button>
+      <button onclick="guardarMovimiento()"
+              class="btn-gold flex-[2] py-[13px] bg-gold text-bg rounded-[10px]
+                     font-bebas text-[15px] tracking-[2px] border-none cursor-pointer
+                     shadow-[0_8px_24px_rgba(255,211,105,.3)]
+                     hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(255,211,105,.4)]
+                     active:translate-y-0 transition-all duration-150">
+        Registrar Movimiento
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-6 right-6 z-[999] hidden bg-surface border border-gold/25 rounded-[12px] px-5 py-3 shadow-[0_8px_32px_rgba(0,0,0,.5)] flex items-center gap-3">
+  <div id="toast-icon" class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"></div>
+  <p id="toast-msg" class="text-[14px] font-semibold tracking-[0.5px] text-white"></p>
+</div>
+
+<!-- FOOTER -->
+<footer class="relative z-10 text-center py-6 mt-8 border-t border-white/5">
+  <p class="text-[11px] text-muted tracking-[1.5px] uppercase">
+    © 2025 <span class="text-gold">Moto Leon Racing</span> — Sistema de Gestión de Inventario
+  </p>
+</footer>
+
+
+<script>
+  /* ─── Datos de ejemplo ─── */
+  let movimientos = [
+    { mov_id:1, fecha_movimiento:'2025-07-10', mov_tipo:'ENTRADA',    deta_mov_id:101, prod_nombre:'Filtro de aceite K&N',      det_mov_cantidad:5,  deta_mov_precio:32000,  subtotal:160000 },
+    { mov_id:2, fecha_movimiento:'2025-07-11', mov_tipo:'SALIDA',     deta_mov_id:102, prod_nombre:'Pastilla de freno Brembo',  det_mov_cantidad:2,  deta_mov_precio:85000,  subtotal:170000 },
+    { mov_id:3, fecha_movimiento:'2025-07-12', mov_tipo:'ENTRADA',    deta_mov_id:103, prod_nombre:'Aceite Motul 10W-40',       det_mov_cantidad:10, deta_mov_precio:28000,  subtotal:280000 },
+    { mov_id:4, fecha_movimiento:'2025-07-13', mov_tipo:'DEVOLUCION', deta_mov_id:104, prod_nombre:'Cadena 520 DID',            det_mov_cantidad:1,  deta_mov_precio:120000, subtotal:120000 },
+    { mov_id:5, fecha_movimiento:'2025-07-14', mov_tipo:'SALIDA',     deta_mov_id:105, prod_nombre:'Bujía NGK Iridium',         det_mov_cantidad:4,  deta_mov_precio:18000,  subtotal:72000  },
+    { mov_id:6, fecha_movimiento:'2025-07-15', mov_tipo:'ENTRADA',    deta_mov_id:106, prod_nombre:'Llanta Pirelli Diablo',     det_mov_cantidad:2,  deta_mov_precio:320000, subtotal:640000 },
+  ];
+
+  let nextId    = 7;
+  let tabActual = 'todos';
+  let tipoSel   = '';
+
+  /* ─── Helpers ─── */
+  const fmt = n => '$ ' + Number(n).toLocaleString('es-CO');
+
+  const TIPOS = {
+    ENTRADA:    { color:'text-green-400',  bg:'bg-green-400/10',  border:'border-green-400/25',  label:'Entrada'    },
+    SALIDA:     { color:'text-red-400',    bg:'bg-red-400/10',    border:'border-red-400/25',    label:'Salida'     },
+    DEVOLUCION: { color:'text-orange-400', bg:'bg-orange-400/10', border:'border-orange-400/25', label:'Devolución' },
+  };
+
+  function badge(tipo) {
+    const c = TIPOS[tipo];
+    return `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-bold tracking-[1px] uppercase ${c.color} ${c.bg} border ${c.border}">
+      <span class="w-1.5 h-1.5 rounded-full bg-current inline-block"></span>${c.label}
+    </span>`;
+  }
+
+  function fmtFecha(f) {
+    if (!f) return '—';
+    const [y,m,d] = f.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  /* ─── Render ─── */
+  function renderTabla() {
+    const q   = document.getElementById('search-input').value.trim().toLowerCase();
+    const fd  = document.getElementById('filter-date').value;
+
+    const datos = movimientos.filter(m => {
+      if (tabActual !== 'todos' && m.mov_tipo !== tabActual) return false;
+      if (fd && m.fecha_movimiento !== fd) return false;
+      if (q && !m.prod_nombre.toLowerCase().includes(q) && !String(m.mov_id).includes(q)) return false;
+      return true;
+    });
+
+    const tbody = document.getElementById('tabla-body');
+    const empty = document.getElementById('empty-state');
+
+    if (datos.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.remove('hidden');
+    } else {
+      empty.classList.add('hidden');
+      tbody.innerHTML = datos.map((m, i) => {
+        const stripe = i % 2 !== 0 ? 'bg-white/[.015]' : '';
+        return `
+        <tr class="mov-row border-b border-white/5 ${stripe}">
+          <td class="px-5 py-4 font-mono text-[12px] text-muted">#${String(m.mov_id).padStart(4,'0')}</td>
+          <td class="px-5 py-4 text-[13px] font-medium text-white/80">${fmtFecha(m.fecha_movimiento)}</td>
+          <td class="px-5 py-4">${badge(m.mov_tipo)}</td>
+          <td class="px-5 py-4 font-mono text-[12px] text-muted">${m.deta_mov_id}</td>
+          <td class="px-5 py-4 font-semibold text-white">${m.prod_nombre}</td>
+          <td class="px-5 py-4 text-center font-mono text-[13px] text-white">${m.det_mov_cantidad}</td>
+          <td class="px-5 py-4 text-right font-mono text-[13px] text-white/70">${fmt(m.deta_mov_precio)}</td>
+          <td class="px-5 py-4 text-right font-bebas text-[15px] tracking-[1px] text-gold">${fmt(m.subtotal)}</td>
+          <td class="px-5 py-4">
+            <div class="flex items-center justify-center gap-2">
+              <button onclick="verDetalle(${m.mov_id})" title="Ver detalle"
+                      class="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10
+                             text-muted hover:text-gold hover:border-gold/30 transition-all duration-150 cursor-pointer bg-transparent">
+                <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <button onclick="eliminarMov(${m.mov_id})" title="Eliminar"
+                      class="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10
+                             text-muted hover:text-red-400 hover:border-red-400/30 transition-all duration-150 cursor-pointer bg-transparent">
+                <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    /* Actualizar stats */
+    document.getElementById('stat-total').textContent        = movimientos.length;
+    document.getElementById('stat-entradas').textContent     = movimientos.filter(m => m.mov_tipo === 'ENTRADA').length;
+    document.getElementById('stat-salidas').textContent      = movimientos.filter(m => m.mov_tipo === 'SALIDA').length;
+    document.getElementById('stat-devoluciones').textContent = movimientos.filter(m => m.mov_tipo === 'DEVOLUCION').length;
+    document.getElementById('tabla-info').textContent        = `${datos.length} registro${datos.length !== 1 ? 's' : ''}`;
+    document.getElementById('total-general').textContent     = fmt(datos.reduce((a,m) => a + m.subtotal, 0));
+  }
+
+  /* ─── Filtros ─── */
+  function filtrar() { renderTabla(); }
+
+  function setTab(t) {
+    tabActual = t;
+    document.querySelectorAll('.tab-filter').forEach(b => b.classList.remove('tab-active'));
+    document.getElementById('tab-' + t).classList.add('tab-active');
+    renderTabla();
+  }
+
+  function limpiarFiltros() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-date').value  = '';
+    setTab('todos');
+  }
+
+  /* ─── Modal ─── */
+  function abrirModal() {
+    tipoSel = '';
+    const clsOff = 'tipo-btn border border-white/10 bg-bg rounded-[10px] py-3 text-[12px] font-bold tracking-[1px] uppercase text-muted cursor-pointer flex flex-col items-center gap-1.5';
+    ['ENTRADA','SALIDA','DEVOLUCION'].forEach(t => {
+      document.getElementById('tipo-'+t).className = clsOff;
+    });
+    ['f-producto','f-deta','f-cantidad','f-precio'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('preview-subtotal').textContent = '$ 0.00';
+    document.getElementById('modal-error').classList.add('hidden');
+    document.getElementById('modal-overlay').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-overlay').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+  });
+
+  function selTipo(t) {
+    tipoSel = t;
+    const base = 'tipo-btn rounded-[10px] py-3 text-[12px] font-bold tracking-[1px] uppercase cursor-pointer flex flex-col items-center gap-1.5 border ';
+    const clsMap = {
+      ENTRADA:    base + 'border-green-400  bg-green-400/10  text-green-400',
+      SALIDA:     base + 'border-red-400    bg-red-400/10    text-red-400',
+      DEVOLUCION: base + 'border-orange-400 bg-orange-400/10 text-orange-400',
+    };
+    const clsOff = 'tipo-btn border border-white/10 bg-bg rounded-[10px] py-3 text-[12px] font-bold tracking-[1px] uppercase text-muted cursor-pointer flex flex-col items-center gap-1.5';
+    ['ENTRADA','SALIDA','DEVOLUCION'].forEach(k => {
+      document.getElementById('tipo-'+k).className = k === t ? clsMap[k] : clsOff;
+    });
+  }
+
+  function calcSubtotal() {
+    const qty  = parseFloat(document.getElementById('f-cantidad').value) || 0;
+    const prec = parseFloat(document.getElementById('f-precio').value)   || 0;
+    document.getElementById('preview-subtotal').textContent =
+      '$ ' + (qty * prec).toLocaleString('es-CO', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  }
+
+  function guardarMovimiento() {
+    const prod  = document.getElementById('f-producto').value.trim();
+    const fecha = document.getElementById('f-fecha').value;
+    const deta  = document.getElementById('f-deta').value;
+    const cant  = parseFloat(document.getElementById('f-cantidad').value);
+    const prec  = parseFloat(document.getElementById('f-precio').value);
+    const err   = document.getElementById('modal-error');
+
+    if (!tipoSel || !prod || !fecha || !deta || !cant || !prec) {
+      err.classList.remove('hidden');
+      err.style.animation = 'none';
+      void err.offsetWidth;
+      err.style.animation = 'shake .35s ease';
+      return;
+    }
+
+    err.classList.add('hidden');
+    movimientos.push({
+      mov_id: nextId++,
+      fecha_movimiento: fecha,
+      mov_tipo: tipoSel,
+      deta_mov_id: parseInt(deta),
+      prod_nombre: prod,
+      det_mov_cantidad: cant,
+      deta_mov_precio: prec,
+      subtotal: cant * prec,
+    });
+
+    cerrarModal();
+    renderTabla();
+    showToast('Movimiento registrado correctamente', 'ok');
+  }
+
+  /* ─── Acciones tabla ─── */
+  function verDetalle(id) {
+    const m = movimientos.find(x => x.mov_id === id);
+    if (!m) return;
+    showToast(`${m.prod_nombre} — ${m.det_mov_cantidad} und. × ${fmt(m.deta_mov_precio)}`, 'info');
+  }
+
+  function eliminarMov(id) {
+    if (!confirm('¿Eliminar este movimiento?')) return;
+    movimientos = movimientos.filter(m => m.mov_id !== id);
+    renderTabla();
+    showToast('Movimiento eliminado', 'warn');
+  }
+
+  /* ─── Toast ─── */
+  function showToast(msg, type) {
+    const toast = document.getElementById('toast');
+    const icon  = document.getElementById('toast-icon');
+    const txt   = document.getElementById('toast-msg');
+
+    const cfg = {
+      ok:   { bg:'bg-green-400/20',  border:'border-green-400/30',  stroke:'#4ade80', path:'<polyline points="20 6 9 17 4 12"/>' },
+      warn: { bg:'bg-red-400/20',    border:'border-red-400/30',    stroke:'#f87171', path:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>'},
+      info: { bg:'bg-gold/15',       border:'border-gold/30',       stroke:'#FFD369', path:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'},
+    };
+    const c = cfg[type] || cfg.info;
+
+    icon.className = `w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${c.bg} border ${c.border}`;
+    icon.innerHTML = `<svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="${c.stroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${c.path}</svg>`;
+    txt.textContent = msg;
+
+    toast.classList.remove('hidden');
+    toast.style.animation = 'none';
+    void toast.offsetWidth;
+    toast.style.animation = 'toastIn .4s cubic-bezier(.22,.6,.36,1) both';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.add('hidden'), 3400);
+  }
+
+  /* ─── Init ─── */
+  renderTabla();
+</script>
+
+</body>
+</html>
