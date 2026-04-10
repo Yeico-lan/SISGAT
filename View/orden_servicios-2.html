@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Órdenes de Servicio</title>
+    <style>
+        /* Definición de la Paleta de Colores de image_1.png */
+        :root {
+            --color-principal: #343a40;  /* Gris Oscuro / Fondo Superior */
+            --color-secundario: #ffd369; /* Amarillo / Color de Acento */
+            --color-fondo: #f4f4f4;       /* Gris muy claro / Fondo General */
+            --color-texto: #e0e0e0;       /* Texto Claro para fondo oscuro */
+            --color-borde: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--color-fondo);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1300px; /* Un poco más ancho */
+            margin: auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden; /* Para que el borde redondeado funcione con el header */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            background-color: var(--color-principal);
+            color: var(--color-texto);
+            margin: 0;
+            padding: 20px;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            border-bottom: 4px solid var(--color-secundario); /* Línea de acento amarilla */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-borde);
+        }
+
+        th {
+            background-color: #f8f9fa; /* Un gris muy tenue para los th */
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--color-principal);
+        }
+
+        tbody tr:hover {
+            background-color: #fcfcfc; /* Efecto hover suave */
+        }
+
+        .number-cell {
+            text-align: right;
+            font-family: 'Courier New', Courier, monospace; /* Monospaced para números alineados */
+        }
+
+        .status-badge {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Orden de Servicio</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ord_id</th>
+                <th>Fecha Ingreso</th>
+                <th>Fecha Entrega</th>
+                <th>Estado</th>
+                <th>Descripción</th>
+                <th>Total Servicio</th>
+                <th>Total General</th>
+                <th>moto_id</th>
+                <th>cli_id</th>
+                <th>usu_id</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>2026-03-25</td>
+                <td>2026-03-26</td>
+                <td><span class="status-badge">Terminada</span></td>
+                <td>Cambio pastillas de freno</td>
+                <td class="number-cell">38.000</td>
+                <td class="number-cell">83.000</td>
+                <td>1</td>
+                <td>201</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>2026-03-25</td>
+                <td>2026-03-25</td>
+                <td><span class="status-badge">Terminada</span></td>
+                <td>Cambio de aceite y filtro</td>
+                <td class="number-cell">25.000</td>
+                <td class="number-cell">63.000</td>
+                <td>2</td>
+                <td>202</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>2026-03-26</td>
+                <td>2026-03-26</td>
+                <td><span class="status-badge">Terminada</span></td>
+                <td>Fallo en arranque (Bujía)</td>
+                <td class="number-cell">40.000</td>
+                <td class="number-cell">55.000</td>
+                <td>3</td>
+                <td>203</td>
+                <td>4</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>2026-03-26</td>
+                <td>2026-03-27</td>
+                <td><span class="status-badge">Terminada</span></td>
+                <td>Mantenimiento filtro aire</td>
+                <td class="number-cell">30.000</td>
+                <td class="number-cell">52.000</td>
+                <td>4</td>
+                <td>204</td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>2026-03-27</td>
+                <td>2026-03-28</td>
+                <td><span class="status-badge">Terminada</span></td>
+                <td>Kit de arrastre tensionado</td>
+                <td class="number-cell">55.000</td>
+                <td class="number-cell">240.000</td>
+                <td>5</td>
+                <td>205</td>
+                <td>6</td>
+            </tr>
+             </tbody>
+    </table>
+</div>
+
+</body>
+</html>
