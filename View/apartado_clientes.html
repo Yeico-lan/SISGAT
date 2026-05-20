@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clientes</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config = {
+theme:{
+extend:{
+colors:{
+bg:'#222831',
+surface:'#393E46',
+gold:'#FFD369'
+},
+fontFamily:{
+bebas:['Bebas Neue'],
+raj:['Rajdhani']
+}
+}
+}
+}
+</script>
+
+</head>
+
+<body class="bg-bg min-h-screen text-white font-raj p-8">
+
+<div class="max-w-6xl mx-auto">
+
+    <!-- TITULO -->
+    <div class="mb-8">
+        <h1 class="font-bebas text-5xl tracking-[4px] text-gold">
+            CLIENTES
+        </h1>
+
+        <p class="text-gray-400 uppercase tracking-[2px]">
+            Moto Leon Racing
+        </p>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="bg-surface p-6 rounded-2xl mb-8">
+
+        <div class="grid md:grid-cols-2 gap-5">
+
+            <input type="text"
+                   placeholder="Nombre"
+                   class="bg-bg p-3 rounded-xl border border-gold/20">
+
+            <input type="text"
+                   placeholder="Apellido"
+                   class="bg-bg p-3 rounded-xl border border-gold/20">
+
+            <input type="text"
+                   placeholder="Teléfono"
+                   class="bg-bg p-3 rounded-xl border border-gold/20">
+
+            <input type="email"
+                   placeholder="Correo"
+                   class="bg-bg p-3 rounded-xl border border-gold/20">
+
+        </div>
+
+        <button class="mt-5 bg-gold text-bg px-6 py-3 rounded-xl
+                       font-bold hover:scale-105 transition">
+
+            Registrar Cliente
+
+        </button>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="bg-surface p-6 rounded-2xl overflow-auto">
+
+        <table class="w-full text-left">
+
+            <thead>
+                <tr class="text-gold border-b border-gold/20">
+
+                    <th class="pb-4">ID</th>
+                    <th class="pb-4">Nombre</th>
+                    <th class="pb-4">Apellido</th>
+                    <th class="pb-4">Teléfono</th>
+                    <th class="pb-4">Correo</th>
+
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr class="border-b border-white/10">
+
+                    <td class="py-4">1</td>
+                    <td class="py-4">Alejandro</td>
+                    <td class="py-4">Saenz</td>
+                    <td class="py-4">3001234567</td>
+                    <td class="py-4">alejandro@gmail.com</td>
+
+                </tr>
+
+                <tr>
+
+                    <td class="py-4">2</td>
+                    <td class="py-4">Carlos</td>
+                    <td class="py-4">Martinez</td>
+                    <td class="py-4">3019876543</td>
+                    <td class="py-4">carlos@gmail.com</td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>
