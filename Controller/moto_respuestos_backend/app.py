@@ -5,7 +5,11 @@ import os
 import sys
  
 # Importar la configuración de BD desde Model/db.py
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Model'))
+sys.path.append(
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', '..', 'Model')
+    )
+)
 from db import get_connection
  
 app = Flask(__name__)
@@ -171,6 +175,15 @@ def api_registrar():
 def logout():
     session.clear()
     return redirect(url_for('login_page'))
+
+
+# =========================
+# MODULO MOTOS - YEICO
+# =========================
+
+@app.route('/motos')
+def motos():
+    return render_template('apa_motos.html')
  
  
 if __name__ == '__main__':
