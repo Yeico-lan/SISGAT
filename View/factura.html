@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOTO LEON RACING - Facturas</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    display: flex;
+    background-color: #222831;
+    color: #fff;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    background-color: #393E46;
+    padding: 20px;
+}
+
+/* Logo */
+.logo {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo img {
+    width: 100%;
+    max-width: 180px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.logo h2 {
+    color: #FFD369;
+    font-size: 18px;
+}
+
+/* Menu */
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.sidebar ul li:hover {
+    background-color: #FFD369;
+    color: #222831;
+}
+
+/* Main */
+.main {
+    flex: 1;
+    padding: 25px;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.user {
+    background-color: #FFD369;
+    color: #222831;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+/* Cards */
+.cards {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.card {
+    flex: 1;
+    background-color: #393E46;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.card h3 {
+    color: #FFD369;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Formulario */
+.formulario {
+    background-color: #393E46;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+.formulario h2 {
+    color: #FFD369;
+    margin-bottom: 15px;
+}
+
+.inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+input {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    outline: none;
+    background-color: #222831;
+    color: white;
+}
+
+button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #FFD369;
+    color: #222831;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #393E46;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #FFD369;
+    color: #222831;
+}
+
+tr:nth-child(even) {
+    background-color: #2f343c;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+    <div class="logo">
+        <h2>MOTO LEON RACING</h2>
+        <img src="logo.png" alt="Moto Leon Racing">
+    </div>
+
+    <ul>
+        <li>🏠 Inicio</li>
+        <li>🧾 Facturas</li>
+        <li>👤 Clientes</li>
+        <li>🏍️ Motos</li>
+        <li>📦 Productos</li>
+    </ul>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <div class="header">
+        <h1>Módulo de Facturación</h1>
+        <div class="user">Administrador</div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="cards">
+
+        <div class="card">
+            <h3>Facturas Hoy</h3>
+            <p>15</p>
+        </div>
+
+        <div class="card">
+            <h3>Ingresos</h3>
+            <p>$2.500.000</p>
+        </div>
+
+        <div class="card">
+            <h3>Clientes</h3>
+            <p>8</p>
+        </div>
+
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="formulario">
+
+        <h2>Crear Factura</h2>
+
+        <div class="inputs">
+            <input type="text" placeholder="Nombre del cliente">
+            <input type="text" placeholder="Placa de la moto">
+            <input type="text" placeholder="Producto o servicio">
+            <input type="number" placeholder="Cantidad">
+            <input type="number" placeholder="Precio">
+            <input type="date">
+        </div>
+
+        <button>Generar Factura</button>
+
+    </div>
+
+    <!-- TABLA -->
+    <h2 style="margin-bottom:15px;">Facturas Registradas</h2>
+
+    <table>
+
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Moto</th>
+            <th>Servicio</th>
+            <th>Total</th>
+            <th>Fecha</th>
+        </tr>
+
+        <tr>
+            <td>1</td>
+            <td>Juan Pérez</td>
+            <td>NKD 125</td>
+            <td>Cambio de aceite</td>
+            <td>$40.000</td>
+            <td>21/05/2026</td>
+        </tr>
+
+        <tr>
+            <td>2</td>
+            <td>Carlos Ruiz</td>
+            <td>Yamaha FZ</td>
+            <td>Pastillas de freno</td>
+            <td>$85.000</td>
+            <td>21/05/2026</td>
+        </tr>
+
+        <tr>
+            <td>3</td>
+            <td>Laura Gómez</td>
+            <td>Pulsar NS</td>
+            <td>Kit de arrastre</td>
+            <td>$180.000</td>
+            <td>21/05/2026</td>
+        </tr>
+
+    </table>
+
+</div>
+
+</body>
+</html>
