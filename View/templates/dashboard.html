@@ -94,13 +94,11 @@
 
     <!-- Logo -->
     <div class="px-6 pt-8 pb-6">
-      <div class="w-11 h-11 bg-gold rounded-[10px] flex items-center justify-center mb-4
+      <div class="w-28 h-28 rounded-[10px] mb-4 overflow-hidden
                   shadow-[0_6px_18px_rgba(255,211,105,.3)]">
-        <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="#222831"
-             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm11 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0z
-                   M2 9l2-4h9l3 4M7 9l1-4M13 9l2-4M2 9h20M9 13l3-4 3 4"/>
-        </svg>
+        <img src="{{ url_for('static', filename='img/logo.png') }}"
+             alt="Moto León Racing"
+             class="w-full h-full object-contain">
       </div>
       <h2 class="font-bebas text-[17px] tracking-[3px] text-gold leading-none">MOTO LEON</h2>
       <p class="text-[10px] text-muted tracking-[2px] uppercase mt-0.5">Racing Panel</p>
