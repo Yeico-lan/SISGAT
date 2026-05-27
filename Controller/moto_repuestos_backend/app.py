@@ -7,8 +7,9 @@ import sys
 # ──────────────────────────────────────────
 #  IMPORTAR DB DESDE MODEL
 # ──────────────────────────────────────────
-sys.path.append(r'C:\Users\javie\OneDrive\Documentos\GitHub\SISGAT\Model')
+sys.path.append(r'C:\Users\Soportepq\Documents\GitHub\SISGAT\Model')
 from db import get_connection, Error
+
 
 # ──────────────────────────────────────────
 #  CONFIGURACIÓN DE RUTAS
@@ -16,7 +17,10 @@ from db import get_connection, Error
 template_dir = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', '..', 'View', 'templates')
 )
-app = Flask(__name__, template_folder=template_dir)
+static_dir = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', '..', 'View', 'static')
+)
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir, static_url_path='/static')
 app.secret_key = os.urandom(24)
 
 
