@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MOTO LEON RACING — Iniciar Sesión</title>
 
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <script>
@@ -26,34 +23,44 @@
           rajdhani: ['Rajdhani', 'sans-serif'],
         },
         keyframes: {
-          slideUp: {
-            '0%':   { opacity: '0', transform: 'translateY(32px)' },
+          fadeDown: {
+            '0%':   { opacity: '0', transform: 'translateY(-20px)' },
             '100%': { opacity: '1', transform: 'translateY(0)' },
           },
-          iconPop: {
-            '0%':   { transform: 'scale(0)', opacity: '0' },
-            '100%': { transform: 'scale(1)', opacity: '1' },
+          fadeUp: {
+            '0%':   { opacity: '0', transform: 'translateY(20px)' },
+            '100%': { opacity: '1', transform: 'translateY(0)' },
+          },
+          logoReveal: {
+            '0%':   { opacity: '0', transform: 'scale(0.8) translateY(-10px)' },
+            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
           },
           gridMove: {
             '0%':   { backgroundPosition: '0 0' },
             '100%': { backgroundPosition: '48px 48px' },
           },
-          pulseglow: {
-            '0%,100%': { opacity: '1', transform: 'translate(-50%,-50%) scale(1)' },
-            '50%':     { opacity: '.6', transform: 'translate(-50%,-50%) scale(1.12)' },
+          shimmer: {
+            '0%':   { backgroundPosition: '-200% 0' },
+            '100%': { backgroundPosition: '200% 0' },
           },
           shake: {
             '0%,100%': { transform: 'translateX(0)' },
             '25%':     { transform: 'translateX(-6px)' },
             '75%':     { transform: 'translateX(6px)' },
           },
+          glowPulse: {
+            '0%,100%': { boxShadow: '0 0 30px rgba(255,211,105,.15)' },
+            '50%':     { boxShadow: '0 0 60px rgba(255,211,105,.3)' },
+          },
         },
         animation: {
-          slideUp:   'slideUp .6s cubic-bezier(.22,.6,.36,1) both',
-          iconPop:   'iconPop .5s .25s cubic-bezier(.34,1.56,.64,1) both',
-          gridMove:  'gridMove 18s linear infinite',
-          pulseglow: 'pulseglow 4s ease-in-out infinite',
-          shake:     'shake .35s ease',
+          fadeDown:   'fadeDown .7s cubic-bezier(.22,.6,.36,1) both',
+          fadeUp:     'fadeUp .7s cubic-bezier(.22,.6,.36,1) both',
+          logoReveal: 'logoReveal .8s cubic-bezier(.34,1.56,.64,1) both',
+          gridMove:   'gridMove 18s linear infinite',
+          shimmer:    'shimmer 3s linear infinite',
+          shake:      'shake .35s ease',
+          glowPulse:  'glowPulse 3s ease-in-out infinite',
         },
       },
     },
@@ -63,54 +70,167 @@
 <style>
   body { font-family: 'Rajdhani', sans-serif; }
 
+  /* Fondo con cuadrícula animada */
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background-image:
-      linear-gradient(rgba(255,211,105,.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,211,105,.06) 1px, transparent 1px);
+      linear-gradient(rgba(255,211,105,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,211,105,.05) 1px, transparent 1px);
     background-size: 48px 48px;
     animation: gridMove 18s linear infinite;
     pointer-events: none;
     z-index: 0;
   }
 
+  /* Viñeta radial central */
   body::after {
     content: '';
     position: fixed;
-    width: 520px; height: 520px;
-    background: radial-gradient(circle, rgba(255,211,105,.14) 0%, transparent 70%);
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(255,211,105,.08) 0%, transparent 65%);
     top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
     pointer-events: none;
     z-index: 0;
-    animation: pulseglow 4s ease-in-out infinite;
   }
 
+  /* Layout: lado izquierdo decorativo + formulario */
+  .login-wrapper {
+    display: flex;
+    width: 860px;
+    min-height: 560px;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Panel izquierdo — decorativo */
+  .panel-left {
+    width: 340px;
+    flex-shrink: 0;
+    background: linear-gradient(160deg, #1a1f27 0%, #222831 60%, #1e2530 100%);
+    border-radius: 20px 0 0 20px;
+    border: 1px solid rgba(255,211,105,.12);
+    border-right: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel-left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,211,105,.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(255,211,105,.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Líneas decorativas diagonales */
+  .panel-left::after {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border: 1px solid rgba(255,211,105,.08);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .deco-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,211,105,.2), transparent);
+    width: 80%;
+  }
+
+  /* Panel derecho — formulario */
+  .panel-right {
+    flex: 1;
+    background: #393E46;
+    border-radius: 0 20px 20px 0;
+    border: 1px solid rgba(255,211,105,.12);
+    border-left: 1px solid rgba(255,211,105,.06);
+    padding: 44px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel-right::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle at top right, rgba(255,211,105,.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Divisor dorado */
   .divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(255,211,105,.3), transparent);
   }
 
+  /* Inputs */
+  .input-field {
+    background: #222831;
+    border: 1px solid rgba(255,211,105,.15);
+    border-radius: 10px;
+    color: white;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    transition: border-color .2s, box-shadow .2s;
+  }
   .input-field:focus {
     outline: none;
     border-color: #FFD369;
-    box-shadow: 0 0 0 3px rgba(255,211,105,.12);
+    box-shadow: 0 0 0 3px rgba(255,211,105,.1);
   }
-
+  .input-field::placeholder { color: #8b8fa8; }
   .input-wrap:focus-within .input-icon { stroke: #FFD369; }
 
+  /* Botón con shimmer */
+  .btn-login {
+    position: relative;
+    overflow: hidden;
+    background: #FFD369;
+    color: #222831;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    letter-spacing: 3px;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    padding: 14px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,211,105,.3);
+    transition: transform .15s, box-shadow .15s;
+  }
   .btn-login::before {
     content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,.2), transparent);
-    opacity: 0;
-    transition: opacity .2s;
-    border-radius: 10px;
+    position: absolute; inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.3) 50%, transparent 60%);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
   }
-  .btn-login:hover::before { opacity: 1; }
+  .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(255,211,105,.4);
+  }
+  .btn-login:active { transform: translateY(0); }
 
+  /* Checkbox custom */
   .remember input { display: none; }
   .checkmark {
     width: 16px; height: 16px;
@@ -136,7 +256,7 @@
   }
   .remember input:checked ~ .checkmark::after { opacity: 1; }
 
-  /* Spinner de carga */
+  /* Spinner */
   .spinner {
     display: inline-block;
     width: 16px; height: 16px;
@@ -148,130 +268,151 @@
     margin-right: 8px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Badge rol */
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(255,211,105,.08);
+    border: 1px solid rgba(255,211,105,.2);
+    border-radius: 20px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #FFD369;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .role-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: #FFD369;
+    border-radius: 50%;
+    animation: glowPulse 2s ease-in-out infinite;
+  }
 </style>
 </head>
 
-<body class="min-h-screen bg-bg flex items-center justify-center overflow-hidden relative">
+<body class="min-h-screen bg-bg flex items-center justify-center overflow-hidden relative px-4">
 
-  <div class="card relative z-10 w-[420px] bg-surface rounded-[18px] px-11 pt-12 pb-11
-              border border-gold/15
-              shadow-[0_0_0_1px_rgba(255,211,105,.08),0_32px_80px_rgba(0,0,0,.5),0_0_60px_rgba(255,211,105,.06)]
-              animate-slideUp">
+  <div class="login-wrapper shadow-[0_40px_100px_rgba(0,0,0,.6),0_0_0_1px_rgba(255,211,105,.06)]">
 
-    <!-- MARCA -->
-    <div class="text-center mb-9">
-      <div class="brand-icon w-[72px] h-[72px] bg-gold rounded-[18px] flex items-center justify-center
-                  mx-auto mb-4 shadow-[0_8px_24px_rgba(255,211,105,.35)] animate-iconPop">
-        <svg viewBox="0 0 24 24" class="w-[38px] h-[38px]"
-             xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#222831" stroke-width="1.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm11 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0z
-                   M2 9l2-4h9l3 4M7 9l1-4M13 9l2-4M2 9h20M9 13l3-4 3 4"/>
-        </svg>
+    <!-- ══ PANEL IZQUIERDO ══ -->
+    <div class="panel-left">
+      <div class="deco-line" style="top: 30%"></div>
+      <div class="deco-line" style="bottom: 30%"></div>
+
+      <!-- Logo -->
+      <div class="relative z-10 flex flex-col items-center" style="animation: logoReveal .8s cubic-bezier(.34,1.56,.64,1) both">
+        <img src="{{ url_for('static', filename='img/logo.png') }}"
+             alt="Moto León Racing"
+             class="w-65 h-65 object-contain drop-shadow-[0_8px_24px_rgba(255,211,105,.3)]">
+
+        <div class="mt-6 text-center">
+          <h1 class="font-bebas text-[28px] tracking-[4px] text-gold leading-none">MOTO LEON</h1>
+          <h2 class="font-bebas text-[20px] tracking-[6px] text-white/70 leading-none mt-0.5">RACING</h2>
+          <div class="divider mt-4 mb-4"></div>
+          <span class="role-badge">Sistema de Gestión</span>
+        </div>
       </div>
-      <h1 class="font-bebas text-[26px] tracking-[3px] text-gold leading-none">
-        MOTO LEON RACING
-      </h1>
-      <p class="text-[11px] text-muted tracking-[2px] uppercase mt-1">
-        Sistema de Gestión
-      </p>
-    </div>
 
-    <div class="divider mb-8"></div>
-
-    <!-- CAMPO: Correo -->
-    <div class="mb-5">
-      <label for="correo"
-             class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
-        Correo electrónico
-      </label>
-      <div class="input-wrap relative">
-        <input type="email" id="correo" placeholder="usuario@taller.com" autocomplete="off"
-               class="input-field w-full py-[13px] pr-[14px] pl-[42px]
-                      bg-bg border border-gold/15 rounded-[10px]
-                      text-white font-rajdhani text-[15px] font-medium
-                      transition-all duration-200"/>
-        <svg class="input-icon absolute left-[14px] top-1/2 -translate-y-1/2 w-4 h-4
-                    fill-none stroke-muted stroke-2 pointer-events-none transition-all duration-200"
-             viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-        </svg>
+      <!-- Decoración inferior -->
+      <div class="absolute bottom-6 left-0 right-0 flex justify-center">
+        <p class="text-[10px] text-muted/40 tracking-[2px] uppercase">© 2026 Moto Leon Racing</p>
       </div>
     </div>
 
-    <!-- CAMPO: Contraseña -->
-    <div class="mb-5">
-      <label for="contrasena"
-             class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
-        Contraseña
-      </label>
-      <div class="input-wrap relative">
-        <input type="password" id="contrasena" placeholder="Ingresa tu contraseña" autocomplete="off"
-               class="input-field w-full py-[13px] pr-[42px] pl-[42px]
-                      bg-bg border border-gold/15 rounded-[10px]
-                      text-white font-rajdhani text-[15px] font-medium
-                      transition-all duration-200"/>
-        <svg class="input-icon absolute left-[14px] top-1/2 -translate-y-1/2 w-4 h-4
-                    fill-none stroke-muted stroke-2 pointer-events-none transition-all duration-200"
-             viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="11" rx="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <button id="togglePw" type="button"
-                class="absolute right-3 top-1/2 -translate-y-1/2
-                       bg-transparent border-none cursor-pointer p-1
-                       text-muted hover:text-gold transition-colors duration-200 flex items-center">
-          <svg id="eyeIcon" viewBox="0 0 24 24"
-               class="w-4 h-4 fill-none stroke-current stroke-2 pointer-events-none"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-        </button>
+    <!-- ══ PANEL DERECHO ══ -->
+    <div class="panel-right">
+
+      <!-- Encabezado -->
+      <div class="mb-8" style="animation: fadeDown .6s ease both">
+        <p class="text-[10px] tracking-[3px] uppercase text-gold/60 font-semibold mb-1">Bienvenido de nuevo</p>
+        <h2 class="font-bebas text-[32px] tracking-[2px] text-white leading-none">INICIAR SESIÓN</h2>
+        <p class="text-[13px] text-muted mt-1">Ingresa tus credenciales para continuar</p>
+      </div>
+
+      <div class="divider mb-7"></div>
+
+      <!-- Formulario -->
+      <div style="animation: fadeUp .6s .1s ease both">
+
+        <!-- Correo -->
+        <div class="mb-4">
+          <label for="correo" class="block text-[10px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
+            Correo electrónico
+          </label>
+          <div class="input-wrap relative">
+            <input type="email" id="correo" placeholder="usuario@taller.com" autocomplete="off"
+                   class="input-field"/>
+            <svg class="input-icon absolute left-[14px] top-1/2 -translate-y-1/2 w-4 h-4
+                        fill-none stroke-muted stroke-2 pointer-events-none transition-colors duration-200"
+                 viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="mb-5">
+          <label for="contrasena" class="block text-[10px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
+            Contraseña
+          </label>
+          <div class="input-wrap relative">
+            <input type="password" id="contrasena" placeholder="Ingresa tu contraseña" autocomplete="off"
+                   style="padding-right: 42px;"
+                   class="input-field"/>
+            <svg class="input-icon absolute left-[14px] top-1/2 -translate-y-1/2 w-4 h-4
+                        fill-none stroke-muted stroke-2 pointer-events-none transition-colors duration-200"
+                 viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <button id="togglePw" type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none
+                           cursor-pointer p-1 text-muted hover:text-gold transition-colors duration-200">
+              <svg id="eyeIcon" viewBox="0 0 24 24"
+                   class="w-4 h-4 fill-none stroke-current stroke-2 pointer-events-none"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recordarme -->
+        <div class="flex items-center justify-between mb-6 text-[13px]">
+          <label class="remember flex items-center gap-2 cursor-pointer text-muted select-none">
+            <input type="checkbox" id="remember">
+            <span class="checkmark"></span>
+            Recordarme
+          </label>
+          <a href="#" class="text-gold font-semibold hover:opacity-75 transition-opacity duration-200 text-[12px]">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+
+        <!-- Botón -->
+        <button id="btnLogin" class="btn-login">INICIAR SESIÓN</button>
+
+        <!-- Error -->
+        <div id="errorMsg"
+             class="hidden mt-4 px-4 py-3 bg-red-500/10 border border-red-500/25
+                    rounded-lg text-[13px] text-red-300 text-center">
+        </div>
+
+        <!-- Éxito -->
+        <div id="successMsg"
+             class="hidden mt-4 px-4 py-3 bg-green-500/10 border border-green-500/25
+                    rounded-lg text-[13px] text-green-300 text-center">
+        </div>
+
       </div>
     </div>
-
-    <!-- Recordarme + olvidé contraseña -->
-    <div class="flex items-center justify-between mb-7 text-[13px]">
-      <label class="remember flex items-center gap-2 cursor-pointer text-muted select-none">
-        <input type="checkbox" id="remember">
-        <span class="checkmark"></span>
-        Recordarme
-      </label>
-      <a href="#" class="text-gold font-semibold hover:opacity-75 transition-opacity duration-200">
-        ¿Olvidaste tu contraseña?
-      </a>
-    </div>
-
-    <!-- BOTÓN -->
-    <button id="btnLogin"
-            class="btn-login relative w-full py-[15px] bg-gold text-bg
-                   font-bebas text-[18px] tracking-[3px] rounded-[10px]
-                   cursor-pointer overflow-hidden border-none
-                   shadow-[0_8px_24px_rgba(255,211,105,.3)]
-                   hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(255,211,105,.4)]
-                   active:translate-y-0 transition-all duration-150">
-      INICIAR SESIÓN
-    </button>
-
-    <!-- MENSAJE DE ERROR -->
-    <div id="errorMsg"
-         class="hidden mt-4 px-[14px] py-[10px]
-                bg-red-500/10 border border-red-500/30 rounded-lg
-                text-[13px] text-red-300 text-center">
-    </div>
-
-    <!-- MENSAJE DE ÉXITO -->
-    <div id="successMsg"
-         class="hidden mt-4 px-[14px] py-[10px]
-                bg-green-500/10 border border-green-500/30 rounded-lg
-                text-[13px] text-green-300 text-center">
-    </div>
-
-    <p class="text-center mt-6 text-[12px] text-muted tracking-[1px]">
-      © 2026 <span class="text-gold">Moto Leon Racing</span> — Todos los derechos reservados
-    </p>
 
   </div>
 
@@ -296,13 +437,12 @@
   });
 
   async function login() {
-    const correo    = document.getElementById('correo').value.trim();
+    const correo     = document.getElementById('correo').value.trim();
     const contrasena = document.getElementById('contrasena').value;
-    const errorMsg  = document.getElementById('errorMsg');
+    const errorMsg   = document.getElementById('errorMsg');
     const successMsg = document.getElementById('successMsg');
-    const btn       = document.getElementById('btnLogin');
+    const btn        = document.getElementById('btnLogin');
 
-    // Ocultar mensajes anteriores
     errorMsg.classList.add('hidden');
     successMsg.classList.add('hidden');
 
@@ -311,7 +451,6 @@
       return;
     }
 
-    // Estado de carga
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>VERIFICANDO...';
 
