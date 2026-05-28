@@ -165,17 +165,13 @@
         Productos
       </div>
 
-      <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px]
-                  text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
-             viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="1" y="3" width="15" height="13" rx="2"/>
-          <path d="M16 8h4l3 3v5h-7V8z"/>
-          <circle cx="5.5" cy="18.5" r="2.5"/>
-          <circle cx="18.5" cy="18.5" r="2.5"/>
+      <a href="{{ url_for('proveedores_page') }}" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+         <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
         </svg>
         Proveedores
-      </div>
+      </a>
     </nav>
 
     <!-- Usuario activo -->

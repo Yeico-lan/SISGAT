@@ -7,7 +7,7 @@ import sys
 # ──────────────────────────────────────────
 #  IMPORTAR DB DESDE MODEL
 # ──────────────────────────────────────────
-sys.path.append(r'C:\Users\Soportepq\Documents\GitHub\SISGAT\Model')
+sys.path.append(r'C:\Users\APRENDIZ.25ABOGCDMFORESC.000\Documents\GitHub\SISGAT\Model')
 from db import get_connection, Error
 
 
@@ -185,6 +185,75 @@ def api_registrar():
 def logout():
     session.clear()
     return redirect(url_for('login_page'))
+
+
+# ──────────────────────────────────────────
+#  MÓDULO PROVEEDORES
+# ──────────────────────────────────────────
+@app.route('/proveedores', methods=['GET'])
+def proveedores_page():
+    if not session.get('usuario_id'):
+        return redirect(url_for('login_page'))
+        
+    conn = get_connection()
+    proveedores = []
+    
+    if conn:
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT prov_id, prov_nombre, prov_telefono, prov_correo, prov_direccion 
+                FROM proveedores 
+                ORDER BY prov_nombre
+            """)
+            proveedores = cursor.fetchall()
+        except Error as e:
+            print(f"[SELECT ERROR PROVEEDORES] {e}")
+        finally:
+            cursor.close()
+            conn.close()
+            
+    return render_template('proveedores.html', 
+                           proveedores=proveedores,
+                           nombre=session.get('usuario_nombre'),
+                           rol=session.get('usuario_rol'))
+
+
+@app.route('/api/proveedores', methods=['POST'])
+def api_registrar_proveedor():
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401
+
+    data      = request.get_json(force=True)
+    nombre    = data.get('nombre', '').strip()
+    telefono  = data.get('telefono', '').strip()
+    correo    = data.get('correo', '').strip()
+    direccion = data.get('direccion', '').strip()
+
+    if not nombre:
+        return jsonify({'ok': False, 'mensaje': 'El nombre del proveedor es obligatorio'}), 400
+
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión con la base de datos'}), 500
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            INSERT INTO proveedores (prov_nombre, prov_telefono, prov_correo, prov_direccion)
+            VALUES (%s, %s, %s, %s)
+        """, (nombre, telefono or None, correo or None, direccion or None))
+
+        conn.commit()
+        return jsonify({'ok': True, 'mensaje': f'Proveedor "{nombre}" registrado con éxito.'})
+
+    except Error as e:
+        print(f"[INSERT ERROR PROVEEDOR] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al guardar el proveedor'}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 
 if __name__ == '__main__':
