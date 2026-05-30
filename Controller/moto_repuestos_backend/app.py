@@ -106,9 +106,22 @@ def api_login():
 def dashboard():
     if not session.get('usuario_id'):
         return redirect(url_for('login_page'))
+    
+    conn = get_connection()
+    total_proveedores = 0
+    if conn:
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT COUNT(*) as total FROM proveedores")
+            total_proveedores = cursor.fetchone()['total']
+        finally:
+            cursor.close()
+            conn.close()
+
     return render_template('dashboard.html',
                            nombre=session.get('usuario_nombre'),
-                           rol=session.get('usuario_rol'))
+                           rol=session.get('usuario_rol'),
+                           total_proveedores=total_proveedores)
 
 
 # ──────────────────────────────────────────
