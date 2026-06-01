@@ -10,7 +10,6 @@ import sys
 sys.path.append(r'C:\Users\javie\OneDrive\Documentos\GitHub\SISGAT\Model')
 from db import get_connection, Error
 
-
 # ──────────────────────────────────────────
 #  CONFIGURACIÓN DE RUTAS
 # ──────────────────────────────────────────
@@ -106,7 +105,7 @@ def api_login():
 def dashboard():
     if not session.get('usuario_id'):
         return redirect(url_for('login_page'))
-    
+
     conn = get_connection()
     total_proveedores = 0
     if conn:
@@ -201,22 +200,21 @@ def logout():
 
 
 # ──────────────────────────────────────────
-#  MÓDULO PROVEEDORES
+#  PROVEEDORES
 # ──────────────────────────────────────────
 @app.route('/proveedores', methods=['GET'])
 def proveedores_page():
     if not session.get('usuario_id'):
         return redirect(url_for('login_page'))
-        
+
     conn = get_connection()
     proveedores = []
-    
     if conn:
         try:
             cursor = conn.cursor(dictionary=True)
             cursor.execute("""
-                SELECT prov_id, prov_nombre, prov_telefono, prov_correo, prov_direccion 
-                FROM proveedores 
+                SELECT prov_id, prov_nombre, prov_telefono, prov_correo, prov_direccion
+                FROM proveedores
                 ORDER BY prov_nombre
             """)
             proveedores = cursor.fetchall()
@@ -225,8 +223,8 @@ def proveedores_page():
         finally:
             cursor.close()
             conn.close()
-            
-    return render_template('proveedores.html', 
+
+    return render_template('proveedores.html',
                            proveedores=proveedores,
                            nombre=session.get('usuario_nombre'),
                            rol=session.get('usuario_rol'))
@@ -252,12 +250,10 @@ def api_registrar_proveedor():
 
     try:
         cursor = conn.cursor(dictionary=True)
-        
         cursor.execute("""
             INSERT INTO proveedores (prov_nombre, prov_telefono, prov_correo, prov_direccion)
             VALUES (%s, %s, %s, %s)
         """, (nombre, telefono or None, correo or None, direccion or None))
-
         conn.commit()
         return jsonify({'ok': True, 'mensaje': f'Proveedor "{nombre}" registrado con éxito.'})
 
@@ -268,23 +264,80 @@ def api_registrar_proveedor():
         cursor.close()
         conn.close()
 
+
 # ──────────────────────────────────────────
-#  MÓDULO MOVIMIENTOS
+#  MOVIMIENTOS
 # ──────────────────────────────────────────
-@app.route('/movimientos', methods=['GET'])
+@app.route('/movimientos')
 def movimientos_page():
-    """Renderiza la interfaz visual del módulo de movimientos."""
     if not session.get('usuario_id'):
         return redirect(url_for('login_page'))
-    
+
+    conn = get_connection()
+    movimientos = []
+    if conn:
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT m.mov_id, m.mov_tipo, m.mov_motivo,
+                       m.mov_fecha, m.prod_id,
+                       m.usu_id,
+                       CONCAT(u.usu_nombre, ' ', u.usu_apellido) AS usu_nombre
+                FROM movimientos m
+                LEFT JOIN usuarios u ON u.usu_id = m.usu_id
+                ORDER BY m.mov_fecha DESC
+            """)
+            movimientos = cursor.fetchall()
+            # Convertir fechas a string para Jinja2
+            for m in movimientos:
+                if m['mov_fecha']:
+                    m['mov_fecha'] = m['mov_fecha'].strftime('%Y-%m-%d')
+        except Error as e:
+            print(f"[SELECT ERROR MOVIMIENTOS] {e}")
+        finally:
+            cursor.close()
+            conn.close()
+
     return render_template('movimientos.html',
+                           movimientos=movimientos,
                            nombre=session.get('usuario_nombre'),
                            rol=session.get('usuario_rol'))
 
 
-@app.route('/api/movimientos', methods=['GET', 'POST'])
+@app.route('/guardar_movimiento', methods=['POST'])
+def guardar_movimiento():
+    if not session.get('usuario_id'):
+        return redirect(url_for('login_page'))
+
+    mov_tipo   = request.form.get('mov_tipo', '').strip()
+    mov_motivo = request.form.get('mov_motivo', '').strip()
+    mov_fecha  = request.form.get('mov_fecha', '').strip()
+    usu_id     = request.form.get('usu_id', '').strip()
+
+    if not all([mov_tipo, mov_motivo, mov_fecha, usu_id]):
+        return redirect(url_for('movimientos_page'))
+
+    conn = get_connection()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            prod_id = request.form.get('prod_id', '1').strip() or '1'
+            cursor.execute("""
+                INSERT INTO movimientos (mov_tipo, mov_motivo, mov_fecha, usu_id, prod_id)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (mov_tipo, mov_motivo, mov_fecha, usu_id, prod_id))
+            conn.commit()
+        except Error as e:
+            print(f"[INSERT ERROR MOVIMIENTOS] {e}")
+        finally:
+            cursor.close()
+            conn.close()
+
+    return redirect(url_for('movimientos_page'))
+
+
+@app.route('/api/movimientos', methods=['GET'])
 def api_movimientos():
-    """API para obtener y registrar los movimientos basándose en la estructura real."""
     if not session.get('usuario_id'):
         return jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401
 
@@ -292,41 +345,28 @@ def api_movimientos():
     if not conn:
         return jsonify({'ok': False, 'mensaje': 'Error de conexión con la base de datos'}), 500
 
-    # ── MÉTODO GET: Obtener lista de movimientos reales ──
-    # — MÉTODO GET: Obtener lista de movimientos reales — 
-    if request.method == 'GET':
-        try:
-            cursor = conn.cursor(dictionary=True)
-            
-            # Modificamos la consulta para hacer el INNER JOIN con usuarios
-            query = """
-                SELECT 
-                    m.mov_id, 
-                    m.mov_tipo, 
-                    m.mov_motivo, 
-                    u.usu_nombre AS usu_nombre, 
-                    m.mov_fecha, 
-                    m.prod_id
-                FROM movimientos m
-                INNER JOIN usuarios u ON m.usu_id = u.usu_id
-                ORDER BY m.mov_id DESC
-            """
-            cursor.execute(query)
-            movimientos = cursor.fetchall()
-            
-            # Formateamos la fecha para evitar errores de JSON con objetos datetime
-            for m in movimientos:
-                if m['mov_fecha']:
-                    m['mov_fecha'] = m['mov_fecha'].strftime('%a, %d %b %Y')
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT m.mov_id, m.mov_tipo, m.mov_motivo,
+                   CONCAT(u.usu_nombre, ' ', u.usu_apellido) AS usu_nombre,
+                   m.mov_fecha, m.prod_id
+            FROM movimientos m
+            LEFT JOIN usuarios u ON m.usu_id = u.usu_id
+            ORDER BY m.mov_id ASC
+        """)
+        movimientos = cursor.fetchall()
+        for m in movimientos:
+            if m['mov_fecha']:
+                m['mov_fecha'] = m['mov_fecha'].strftime('%d/%m/%Y')
+        return jsonify(movimientos)
 
-            return jsonify(movimientos)
-            
-        except Error as e:
-            print(f"[SELECT ERROR MOVIMIENTOS] {e}")
-            return jsonify({'ok': False, 'mensaje': 'Error al consultar movimientos'}), 500
-        finally:
-            cursor.close()
-            conn.close()
+    except Error as e:
+        print(f"[SELECT ERROR MOVIMIENTOS] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al consultar movimientos'}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 
 if __name__ == '__main__':
