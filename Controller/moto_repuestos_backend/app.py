@@ -284,7 +284,7 @@ def movimientos_page():
 
 @app.route('/api/movimientos', methods=['GET', 'POST'])
 def api_movimientos():
-    """API para obtener y registrar los movimientos en la base de datos."""
+    """API para obtener y registrar los movimientos basándose en la estructura real."""
     if not session.get('usuario_id'):
         return jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401
 
@@ -292,59 +292,38 @@ def api_movimientos():
     if not conn:
         return jsonify({'ok': False, 'mensaje': 'Error de conexión con la base de datos'}), 500
 
-    # ── MÉTODO GET: Obtener lista completa de movimientos ──
+    # ── MÉTODO GET: Obtener lista de movimientos reales ──
+    # — MÉTODO GET: Obtener lista de movimientos reales — 
     if request.method == 'GET':
         try:
             cursor = conn.cursor(dictionary=True)
-            # Revisa que los nombres de las columnas coincidan con tu DB física de MySQL
-            cursor.execute("""
-                SELECT mov_id, fecha_movimiento, mov_tipo, deta_mov_id, 
-                       prod_nombre, det_mov_cantidad, deta_mov_precio, subtotal
-                FROM movimientos
-                ORDER BY mov_id DESC
-            """)
+            
+            # Modificamos la consulta para hacer el INNER JOIN con usuarios
+            query = """
+                SELECT 
+                    m.mov_id, 
+                    m.mov_tipo, 
+                    m.mov_motivo, 
+                    u.usu_nombre AS usu_nombre, 
+                    m.mov_fecha, 
+                    m.prod_id
+                FROM movimientos m
+                INNER JOIN usuarios u ON m.usu_id = u.usu_id
+                ORDER BY m.mov_id DESC
+            """
+            cursor.execute(query)
             movimientos = cursor.fetchall()
+            
+            # Formateamos la fecha para evitar errores de JSON con objetos datetime
+            for m in movimientos:
+                if m['mov_fecha']:
+                    m['mov_fecha'] = m['mov_fecha'].strftime('%a, %d %b %Y')
+
             return jsonify(movimientos)
             
         except Error as e:
             print(f"[SELECT ERROR MOVIMIENTOS] {e}")
             return jsonify({'ok': False, 'mensaje': 'Error al consultar movimientos'}), 500
-        finally:
-            cursor.close()
-            conn.close()
-
-    # ── MÉTODO POST: Guardar un nuevo movimiento ──
-    elif request.method == 'POST':
-        data = request.get_json(force=True)
-        fecha    = data.get('fecha_movimiento')
-        tipo     = data.get('mov_tipo')
-        id_deta  = data.get('deta_mov_id')
-        producto = data.get('prod_nombre', '').strip()
-        cantidad = data.get('det_mov_cantidad')
-        precio   = data.get('deta_mov_precio')
-
-        if not all([fecha, tipo, id_deta, producto, cantidad, precio]):
-            return jsonify({'ok': False, 'mensaje': 'Todos los campos son obligatorios'}), 400
-
-        try:
-            # Calcular subtotal en backend por seguridad integral del sistema
-            cant_int = int(cantidad)
-            prec_flt = float(precio)
-            subtotal = cant_int * prec_flt
-
-            cursor = conn.cursor(dictionary=True)
-            cursor.execute("""
-                INSERT INTO movimientos (fecha_movimiento, mov_tipo, deta_mov_id, 
-                                         prod_nombre, det_mov_cantidad, deta_mov_precio, subtotal)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (fecha, tipo, id_deta, producto, cant_int, prec_flt, subtotal))
-
-            conn.commit()
-            return jsonify({'ok': True, 'mensaje': 'Movimiento registrado con éxito.'})
-
-        except Error as e:
-            print(f"[INSERT ERROR MOVIMIENTO] {e}")
-            return jsonify({'ok': False, 'mensaje': 'Error al guardar el movimiento en la base de datos'}), 500
         finally:
             cursor.close()
             conn.close()
