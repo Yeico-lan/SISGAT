@@ -63,7 +63,7 @@ def api_login():
             FROM   usuarios u
             JOIN   roles    r ON r.rol_id = u.id_rol
             WHERE  u.usu_correo     = %s
-              AND  u.usu_contraseña = %s
+              AND  u.usu_contrasena = %s
         """, (correo, hash_pw))
  
         usuario = cursor.fetchone()
