@@ -368,6 +368,199 @@ def api_movimientos():
         cursor.close()
         conn.close()
 
+# =====================================
+# API CRUD MOTOS
+# =====================================
+
+@app.route('/api/motos', methods=['GET'])
+def obtener_motos():
+
+    if not session.get('usuario_id'):
+        return jsonify([])
+
+    conn = get_connection()
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                mot_id,
+                mot_placa,
+                mot_marca,
+                mot_modelo,
+                mot_cilindraje,
+                mot_color,
+                mot_estado,
+                cli_id
+            FROM motos
+            ORDER BY mot_id ASC
+        """)
+
+        return jsonify(cursor.fetchall())
+
+    except Error as e:
+        print(e)
+        return jsonify([])
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/api/motos', methods=['POST'])
+def crear_moto():
+
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False}), 401
+
+    data = request.get_json(force=True)
+
+    conn = get_connection()
+
+    try:
+
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO motos
+            (
+                mot_placa,
+                mot_marca,
+                mot_modelo,
+                mot_cilindraje,
+                mot_color,
+                mot_estado,
+                cli_id
+            )
+            VALUES
+            (%s,%s,%s,%s,%s,%s,%s)
+        """, (
+            data['placa'],
+            data['marca'],
+            data['modelo'],
+            data['cilindraje'],
+            data['color'],
+            data['estado'],
+            data['cli_id']
+        ))
+
+        conn.commit()
+
+        return jsonify({
+            'ok': True,
+            'mensaje': 'Moto creada'
+        })
+
+    except Error as e:
+
+        print(e)
+
+        return jsonify({
+            'ok': False,
+            'mensaje': 'Error al crear moto'
+        })
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/api/motos/<int:id>', methods=['PUT'])
+def actualizar_moto(id):
+
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False}), 401
+
+    data = request.get_json(force=True)
+
+    conn = get_connection()
+
+    try:
+
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE motos
+            SET
+                mot_placa=%s,
+                mot_marca=%s,
+                mot_modelo=%s,
+                mot_cilindraje=%s,
+                mot_color=%s,
+                mot_estado=%s,
+                cli_id=%s
+            WHERE mot_id=%s
+        """, (
+            data['placa'],
+            data['marca'],
+            data['modelo'],
+            data['cilindraje'],
+            data['color'],
+            data['estado'],
+            data['cli_id'],
+            id
+        ))
+
+        conn.commit()
+
+        return jsonify({
+            'ok': True,
+            'mensaje': 'Moto actualizada'
+        })
+
+    except Error as e:
+
+        print(e)
+
+        return jsonify({
+            'ok': False,
+            'mensaje': 'Error al actualizar'
+        })
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/api/motos/<int:id>', methods=['DELETE'])
+def eliminar_moto(id):
+
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False}), 401
+
+    conn = get_connection()
+
+    try:
+
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "DELETE FROM motos WHERE mot_id = %s",
+            (id,)
+        )
+
+        conn.commit()
+
+        return jsonify({
+            'ok': True,
+            'mensaje': 'Moto eliminada'
+        })
+
+    except Error as e:
+
+        print(e)
+
+        return jsonify({
+            'ok': False,
+            'mensaje': 'Error al eliminar'
+        })
+
+    finally:
+        cursor.close()
+        conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
+ 

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motos — Moto León Racing</title>
+
+  <!-- FUENTES GOOGLE -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- TAILWIND CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg:      '#222831',
+            surface: '#393E46',
+            side:    '#1e2129',
+            gold:    '#FFD369',
+            muted:   '#8b8fa8',
+          },
+          fontFamily: {
+            bebas:    ['"Bebas Neue"', 'sans-serif'],
+            rajdhani: ['Rajdhani', 'sans-serif'],
+          },
+          keyframes: {
+            fadeIn:  { '0%':{ opacity:'0', transform:'translateY(14px)' }, '100%':{ opacity:'1', transform:'translateY(0)' } },
+            gridMove:{ '0%':{ backgroundPosition:'0 0' }, '100%':{ backgroundPosition:'48px 48px' } },
+            pulseglow:{ '0%,100%':{ opacity:'1' }, '50%':{ opacity:'.5' } },
+            countUp: { '0%':{ opacity:'0', transform:'translateY(8px)' }, '100%':{ opacity:'1', transform:'translateY(0)' } },
+          },
+          animation: {
+            fadeIn:    'fadeIn .5s ease both',
+            gridMove:  'gridMove 20s linear infinite',
+            pulseglow: 'pulseglow 3s ease-in-out infinite',
+            countUp:   'countUp .6s ease both',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Rajdhani', sans-serif; }
+
+    /* Cuadrícula animada de fondo */
+    .bg-grid::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,211,105,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,211,105,.045) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Divisor degradado */
+    .divider { height:1px; background:linear-gradient(90deg,transparent,rgba(255,211,105,.2),transparent); }
+
+    /* Cards e interactivos hover */
+    .stat-card { transition: transform .2s ease, box-shadow .2s ease; }
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.4), 0 0 0 1px rgba(255,211,105,.15);
+    }
+
+    /* Nav links */
+    .nav-link { transition: background .15s, color .15s; }
+    .nav-link:hover { background: rgba(255,211,105,.08); color: #FFD369; }
+    .nav-link.active { background: rgba(255,211,105,.12); color: #FFD369; }
+
+    /* Scrollbars delgados estilo premium */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,211,105,.15); border-radius: 3px; }
+
+    /* Delays de animación escalonada */
+    .delay-1 { animation-delay: .05s; }
+    .delay-2 { animation-delay: .10s; }
+    .delay-3 { animation-delay: .15s; }
+    .delay-4 { animation-delay: .20s; }
+
+    /* Badges de estado estilizados */
+    .badge-active  { background: rgba(74,222,128,.12); color: #4ade80; border: 1px solid rgba(74,222,128,.2); }
+    .badge-repair  { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.2); }
+    .badge-waiting { background: rgba(148,163,184,.12); color: #94a3b8; border: 1px solid rgba(148,163,184,.2); }
+
+    /* Modal Overlay Cristal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.75);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(.95) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-box { animation: modalIn .25s cubic-bezier(.34,1.56,.64,1) both; }
+
+    /* Tooltips nativos */
+    [data-tip] { position: relative; }
+    [data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 115%; left: 50%; transform: translateX(-50%);
+      background: #1e2129; color: #FFD369;
+      font-size: 11px; padding: 4px 8px; border-radius: 4px;
+      white-space: nowrap; pointer-events: none;
+      border: 1px solid rgba(255,211,105,.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,.5);
+    }
+  </style>
+</head>
+
+<body class="bg-grid min-h-screen bg-bg text-white flex">
+
+  <!-- ═══════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════════ -->
+  <aside class="relative z-10 w-[220px] flex-shrink-0 bg-side flex flex-col border-r border-gold/10 min-h-screen">
+    
+    <!-- Logo -->
+    <div class="px-6 pt-8 pb-6">
+      <div class="w-46 h-46 mb-4">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Moto León Racing" class="w-full h-full object-contain">
+      </div>
+      <h2 class="font-bebas text-[17px] tracking-[3px] text-gold leading-none">MOTO LEON</h2>
+      <p class="text-[10px] text-muted tracking-[2px] uppercase mt-0.5">Racing Panel</p>
+    </div>
+
+    <div class="divider mx-4 mb-5"></div>
+
+    <!-- Navegación -->
+    <nav class="flex-1 px-3 space-y-1">
+      <a href="/dashboard" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="/registrar" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/>
+          <line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+        Registrar Usuario
+      </a>
+
+      <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Clientes
+      </div>
+
+      <!-- BOTÓN MOTOS (Gris claro impecable sin fondos pesados) -->
+      <a href="/motos" class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm11 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0z M2 9l2-4h9l3 4M7 9l1-4M13 9l2-4M2 9h20"/>
+        </svg>
+        Motos
+      </a>
+
+      <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+        Productos
+      </div>
+
+      <a href="/proveedores" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="3" width="15" height="13" rx="2"/>
+          <path d="M16 8h4l3 3v5h-7V8z"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/>
+          <circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+        Proveedores
+      </a>
+
+      <a href="/movimientos" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/>
+          <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/>
+          <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        Movimientos
+      </a>
+    </nav>
+
+    <!-- Usuario activo -->
+    <div class="divider mx-4 mb-4"></div>
+    <div class="px-4 pb-6">
+      <div class="flex items-center gap-3 px-3 py-3 rounded-[10px] bg-bg/60">
+        <div class="w-8 h-8 bg-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 text-gold" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-[13px] font-semibold text-white truncate">{{ nombre }}</p>
+          <p class="text-[11px] text-gold truncate">{{ rol }}</p>
+        </div>
+        <a href="/logout" title="Cerrar sesión" class="text-muted hover:text-gold transition-colors duration-150 flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════
+       MAIN CONTENT
+  ════════════════════════════════════ -->
+  <main class="relative z-10 flex-1 px-8 py-8 overflow-y-auto flex flex-col">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-start mb-8 animate-fadeIn">
+      <div>
+        <div class="flex items-center gap-2 text-muted text-[11px] tracking-widest uppercase mb-1">
+          <span>Panel</span>
+          <span class="text-gold">›</span>
+          <span class="text-gold font-bold">Motos</span>
+        </div>
+        <h1 class="font-bebas text-[32px] tracking-[3px] text-white leading-none">
+          GESTIÓN DE MOTOS
+        </h1>
+      </div>
+      <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 text-gold text-[13px] font-semibold tracking-widest">
+        <span class="w-1.5 h-1.5 bg-gold rounded-full animate-pulseglow"></span>
+        {{ rol | upper }}
+      </span>
+    </div>
+
+    <!-- STATS CARDS (Estilo exacto al Dashboard principal) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      
+      <div class="stat-card bg-surface rounded-2xl p-5 border border-gold/10 animate-countUp delay-1 relative overflow-hidden">
+        <div class="absolute -top-4 -right-4 w-16 h-16 bg-gold rounded-full opacity-5"></div>
+        <p class="text-[10px] tracking-[2px] uppercase text-muted mb-3 font-semibold">Total Motos</p>
+        <p class="font-bebas text-[40px] leading-none text-gold" id="statTotal">{{ total_motos }}</p>
+        <div class="divider mt-3"></div>
+        <p class="text-[11px] text-muted mt-2">↑ Registradas</p>
+      </div>
+
+      <div class="stat-card bg-surface rounded-2xl p-5 border border-gold/10 animate-countUp delay-2 relative overflow-hidden">
+        <div class="absolute -top-4 -right-4 w-16 h-16 bg-green-400 rounded-full opacity-5"></div>
+        <p class="text-[10px] tracking-[2px] uppercase text-muted mb-3 font-semibold">En Servicio</p>
+        <p class="font-bebas text-[40px] leading-none text-green-400" id="statActive">{{ en_servicio }}</p>
+        <div class="divider mt-3"></div>
+        <p class="text-[11px] text-muted mt-2">● Listas/Operativas</p>
+      </div>
+
+      <div class="stat-card bg-surface rounded-2xl p-5 border border-gold/10 animate-countUp delay-3 relative overflow-hidden">
+        <div class="absolute -top-4 -right-4 w-16 h-16 bg-yellow-400 rounded-full opacity-5"></div>
+        <p class="text-[10px] tracking-[2px] uppercase text-muted mb-3 font-semibold">En Reparación</p>
+        <p class="font-bebas text-[40px] leading-none text-yellow-400" id="statRepair">{{ en_reparacion }}</p>
+        <div class="divider mt-3"></div>
+        <p class="text-[11px] text-muted mt-2">🔧 En taller mecánico</p>
+      </div>
+
+      <div class="stat-card bg-surface rounded-2xl p-5 border border-gold/10 animate-countUp delay-4 relative overflow-hidden">
+        <div class="absolute -top-4 -right-4 w-16 h-16 bg-slate-400 rounded-full opacity-5"></div>
+        <p class="text-[10px] tracking-[2px] uppercase text-muted mb-3 font-semibold">En Espera</p>
+        <p class="font-bebas text-[40px] leading-none text-slate-400" id="statWaiting">{{ en_espera }}</p>
+        <div class="divider mt-3"></div>
+        <p class="text-[11px] text-muted mt-2">⏳ Por repuestos</p>
+      </div>
+
+    </div>
+
+    <!-- SECCIÓN DE TABLA -->
+    <div class="bg-surface rounded-2xl border border-gold/10 overflow-hidden shadow-xl animate-fadeIn" style="animation-delay:.15s">
+      
+      <!-- TOOLBAR SUPERIOR -->
+      <div class="px-6 py-5 border-b border-white/5 flex items-center justify-between flex-wrap gap-4 bg-surface/50">
+        <div class="flex items-center gap-3">
+          <div class="w-1 h-6 bg-gold rounded-full"></div>
+          <div>
+            <h3 class="font-bebas text-[20px] tracking-[2px] text-white">REGISTRO DE MOTOS</h3>
+            <p class="text-muted text-[12px]" id="recordCount">{{ motos|length }} registros encontrados</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Caja de búsqueda integrada -->
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Buscar moto..." class="bg-bg border border-gold/15 focus:border-gold rounded-xl px-4 py-2 pl-9 text-[14px] text-white outline-none transition-all w-60 font-medium" oninput="filterTable()">
+          </div>
+
+          <!-- Botón primario estilo institucional -->
+          <button class="bg-gold text-bg font-bebas tracking-[1.5px] text-[14px] px-5 py-2 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(255,211,105,0.25)] active:translate-y-0 flex items-center gap-2" onclick="openModal()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            NUEVA MOTO
+          </button>
+        </div>
+      </div>
+
+      <!-- VISOR DE LA TABLA -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-bg/40 border-b border-white/5">
+              <th class="px-5 py-4 text-gold text-[12px] font-bold tracking-widest uppercase">ID</th>
+              <th class="px-5 py-4 text-gold text-[12px] font-bold tracking-widest uppercase">Placa</th>
+              <th class="px-5 py-4 text-gold text-[12px] font-bold tracking-widest uppercase">Marca</th>
+              <th class="px-5 py-4 text-gold text-[12px] font-bold tracking-widest uppercase">Modelo</th>
+              <th class="px-5 py-4 text-gold text-[12px] font-bold tracking-widest uppercase">Cilindraje</th>
+              <th class="px-5 py-4 text-gold text-[12px] font-bold tracking-widest uppercase">Año</th>
+              <th class="px-5 py-4 text-gold text-[12px] font-bold tracking-widest uppercase">Color</th>
+              <th class="px-5 py-4 text-gold text-[12px] font-bold tracking-widest uppercase">Propietario (cli_id)</th>
+              <th class="px-5 py-4 text-gold text-[12px] font-bold tracking-widest uppercase">Estado</th>
+              <th class="px-5 py-4 text-center text-gold text-[12px] font-bold tracking-widest uppercase">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-white/5 text-[14px] font-medium text-white/90">
+            <!-- Inyección dinámica desde script JS backend -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- FOOTER / PAGINACIÓN -->
+      <div class="px-6 py-4 border-t border-white/5 flex items-center justify-between bg-bg/10">
+        <p class="text-muted text-xs">Mostrando <span id="showingCount" class="text-gold font-bold">8</span> de <span class="text-gold font-bold">8</span> registros</p>
+        <div class="flex gap-1">
+          <button class="px-3 py-1.5 rounded-lg bg-bg/60 text-muted text-xs hover:text-gold transition-colors">‹ Ant</button>
+          <button class="px-3 py-1.5 rounded-lg bg-gold text-bg text-xs font-bold shadow-md shadow-gold/10">1</button>
+          <button class="px-3 py-1.5 rounded-lg bg-bg/60 text-muted text-xs hover:text-gold transition-colors">Sig ›</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════
+       MODAL FORMULARIO (Estilo Premium Técnico)
+  ════════════════════════════════════ -->
+  <div id="modal" class="modal-overlay hidden" onclick="closeModalOutside(event)">
+    <div class="modal-box bg-surface rounded-2xl w-full max-w-lg mx-4 border border-gold/15 shadow-2xl overflow-y-auto max-h-[90vh] my-4 flex flex-col" onclick="event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-bg/20">
+        <div class="flex items-center gap-3">
+          <div class="w-1 h-5 bg-gold rounded-full"></div>
+          <h3 class="font-bebas text-[20px] tracking-[1.5px] text-gold" id="modalTitle">NUEVA MOTO</h3>
+        </div>
+        <button onclick="closeModal()" class="text-muted hover:text-gold transition-colors text-lg">✕</button>
+      </div>
+
+      <!-- Modal Body Form -->
+      <div class="px-6 py-6 overflow-y-auto flex-1 space-y-5">
+        <div class="grid grid-cols-2 gap-4">
+
+          <div>
+            <label class="block text-[11px] tracking-[1.5px] uppercase text-muted font-bold mb-1.5">mot_id <span class="text-gold">PK</span></label>
+            <input type="text" id="f_id" class="w-full bg-bg border border-gold/15 rounded-xl px-3 py-2 text-[14px] font-semibold text-muted opacity-60 cursor-not-allowed outline-none" placeholder="Auto" readonly>
+          </div>
+
+          <div>
+            <label class="block text-[11px] tracking-[1.5px] uppercase text-muted font-bold mb-1.5">mot_placa <span class="text-[10px] text-muted/60">(VARCHAR 10)</span></label>
+            <input type="text" id="f_placa" class="w-full bg-bg border border-gold/15 focus:border-gold rounded-xl px-3 py-2 text-[14px] font-semibold text-white outline-none transition-all" placeholder="Ej: ABC12D" maxlength="10">
+          </div>
+
+          <div>
+            <label class="block text-[11px] tracking-[1.5px] uppercase text-muted font-bold mb-1.5">mot_marca <span class="text-[10px] text-muted/60">(VARCHAR 50)</span></label>
+            <input type="text" id="f_marca" class="w-full bg-bg border border-gold/15 focus:border-gold rounded-xl px-3 py-2 text-[14px] font-semibold text-white outline-none transition-all" placeholder="Ej: Yamaha, Honda, AKT...">
+          </div>
+
+          <div>
+            <label class="block text-[11px] tracking-[1.5px] uppercase text-muted font-bold mb-1.5">mot_modelo <span class="text-[10px] text-muted/60">(VARCHAR 50)</span></label>
+            <input type="text" id="f_modelo" class="w-full bg-bg border border-gold/15 focus:border-gold rounded-xl px-3 py-2 text-[14px] font-semibold text-white outline-none transition-all" placeholder="Ej: MT-03, CB300R">
+          </div>
+
+          <div>
+            <label class="block text-[11px] tracking-[1.5px] uppercase text-muted font-bold mb-1.5">mot_cilindraje <span class="text-[10px] text-muted/60">(INT)</span></label>
+            <select id="f_cilindraje" class="w-full bg-bg border border-gold/15 focus:border-gold rounded-xl px-3 py-2 text-[14px] font-semibold text-white outline-none transition-all cursor-pointer">
+              <option value="">cc...</option>
+              <option>100</option>
+              <option>125</option>
+              <option>150</option>
+              <option>200</option>
+              <option>250</option>
+              <option>300</option>
+              <option>321</option>
+              <option>400</option>
+              <option>600</option>
+              <option>1000</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] tracking-[1.5px] uppercase text-muted font-bold mb-1.5">mot_año <span class="text-[10px] text-muted/60">(INT 4)</span></label>
+            <input type="number" id="f_anio" class="w-full bg-bg border border-gold/15 focus:border-gold rounded-xl px-3 py-2 text-[14px] font-semibold text-white outline-none transition-all" placeholder="Ej: 2023" min="1990" max="2026">
+          </div>
+
+          <div>
+            <label class="block text-[11px] tracking-[1.5px] uppercase text-muted font-bold mb-1.5">mot_color <span class="text-[10px] text-muted/60">(VARCHAR 30)</span></label>
+            <input type="text" id="f_color" class="w-full bg-bg border border-gold/15 focus:border-gold rounded-xl px-3 py-2 text-[14px] font-semibold text-white outline-none transition-all" placeholder="Ej: Azul, Negro mate">
+          </div>
+
+          <div>
+            <label class="block text-[11px] tracking-[1.5px] uppercase text-muted font-bold mb-1.5">cli_id <span class="text-gold">FK</span> <span class="text-[10px] text-muted/60">→ CLIENTES</span></label>
+            <input type="text" id="f_cliente" class="w-full bg-bg border border-gold/15 focus:border-gold rounded-xl px-3 py-2 text-[14px] font-semibold text-white outline-none transition-all" placeholder="ID del propietario">
+          </div>
+
+          <div class="col-span-2">
+            <label class="block text-[11px] tracking-[1.5px] uppercase text-muted font-bold mb-1.5">Estado en Interfaz</label>
+            <select id="f_estado" class="w-full bg-bg border border-gold/15 focus:border-gold rounded-xl px-3 py-2 text-[14px] font-semibold text-white outline-none transition-all cursor-pointer">
+              <option value="activo">✅ Activo / Entregado</option>
+              <option value="repair">🔧 En Reparación</option>
+              <option value="waiting">⏳ En Espera</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Actions Layout -->
+      <div class="px-6 py-4 border-t border-white/5 flex gap-3 justify-end bg-bg/20">
+        <button class="border border-gold/30 hover:bg-gold/10 text-gold font-bebas tracking-[1.5px] text-[14px] px-5 py-2 rounded-xl transition-all" onclick="closeModal()">
+          CANCELAR
+        </button>
+        <button class="bg-gold text-bg font-bebas tracking-[1.5px] text-[14px] px-6 py-2 rounded-xl shadow-lg shadow-gold/10 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2" onclick="saveMoto()">
+          <span id="saveLabel">💾 GUARDAR MOTO</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
+
+  <!-- ═══════════════════════════════════════════════════════
+       JAVASCRIPT — Lógica del módulo de motos
+       ─────────────────────────────────────────────────────
+       Maneja: datos de ejemplo, renderizado de tabla,
+       búsqueda en tiempo real, CRUD del modal y badge de estado
+  ═══════════════════════════════════════════════════════════ -->
+  <script>
+    
+    /* ── 2. DATOS DE PRUEBA (MOCK DATA) ─────────────────────── */
+    const motosData = [
+      {% if motos %}
+        {% for m in motos %}
+        {
+          id:          {{ m.moto_id }},
+          placa:      '{{ m.moto_placa }}',
+          marca:      '{{ m.moto_marca }}',
+          linea:      '{{ m.moto_linea }}',
+          propietario:'{{ m.prop_nombre }}',
+          documento:  '{{ m.prop_cedula }}',
+          estado:     '{{ m.moto_estado }}'
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      {% endif %}
+    ];
+    
+
+    let editingId = null;
+
+    /* ── 3. RENDERIZAR TABLA ────────────────────────────────
+       Recibe un array (filtrado o completo) e inyecta las filas
+       en el elemento <tbody id="tableBody">                   */
+    function renderTable(data) {
+      const tbody = document.getElementById('tableBody');
+      /* Limpia las filas anteriores antes de renderizar       */
+      tbody.innerHTML = '';
+
+      /* Recorre cada objeto del array y crea una fila <tr>    */
+      data.forEach((moto, index) => {
+
+        /* ─ Determinar clase y texto del badge de estado ─    */
+        let badgeClass, badgeText;
+        if (moto.estado === 'activo') {
+          badgeClass = 'badge-active';
+          badgeText  = '✅ Activo';
+        } else if (moto.estado === 'repair') {
+          badgeClass = 'badge-repair';
+          badgeText  = '🔧 Reparación';
+        } else {
+          badgeClass = 'badge-waiting';
+          badgeText  = '⏳ En Espera';
+        }
+
+        /* ─ Crear la fila con template literal (`) ─────────
+           Cada celda <td> corresponde a un campo de la tabla  */
+        const row = document.createElement('tr');
+
+        /* Filas alternadas: par usa bg-brand-row, impar bg transparente
+           + hover dorado definido en CSS                        */
+        row.className = `table-row-hover transition-colors ${index % 2 === 0 ? 'bg-transparent' : 'bg-brand-row'}`;
+
+        row.innerHTML = `
+          <!-- mot_id: clave primaria, se muestra en dorado -->
+          <td class="px-5 py-3.5 text-brand-gold font-bold text-sm">#${moto.id}</td>
+
+          <!-- mot_placa: código vehicular, fuente monospace look -->
+          <td class="px-5 py-3.5">
+            <span class="bg-brand-dark px-2.5 py-1 rounded-md text-brand-light text-sm font-bold tracking-widest border border-brand-gold border-opacity-20">${moto.placa}</span>
+          </td>
+
+          <!-- mot_marca: con punto de color representativo -->
+          <td class="px-5 py-3.5 text-brand-light text-sm font-semibold">${moto.marca}</td>
+
+          <!-- mot_modelo -->
+          <td class="px-5 py-3.5 text-brand-light text-sm">${moto.modelo}</td>
+
+          <!-- mot_cilindraje: con unidad cc -->
+          <td class="px-5 py-3.5 text-brand-muted text-sm">${moto.cc} <span class="text-xs">cc</span></td>
+
+          <!-- mot_año -->
+          <td class="px-5 py-3.5 text-brand-muted text-sm">${moto.anio}</td>
+
+          <!-- mot_color -->
+          <td class="px-5 py-3.5 text-brand-muted text-sm">${moto.color}</td>
+
+          <!-- cli_id (FK): resaltado para indicar que es clave foránea -->
+          <td class="px-5 py-3.5">
+            <span class="text-brand-muted text-xs border border-brand-muted border-opacity-30 px-2 py-0.5 rounded">CLI-${moto.cli}</span>
+          </td>
+
+          <!-- Estado: badge de color según estado -->
+          <td class="px-5 py-3.5">
+            <span class="badge-base ${badgeClass} text-xs px-2.5 py-1 rounded-full font-semibold" style="font-family:'Rajdhani',sans-serif">${badgeText}</span>
+          </td>
+
+          <!-- Acciones: Editar y Eliminar -->
+          <td class="px-5 py-3.5 text-center">
+            <div class="flex gap-2 justify-center">
+
+              <!-- Botón Editar: fondo dorado tenue -->
+              <button data-tip="Editar"
+                class="action-btn bg-brand-gold bg-opacity-10 text-brand-gold border-brand-gold border-opacity-30 hover:bg-opacity-20"
+                onclick="editMoto(${moto.id})">
+                ✏️
+              </button>
+
+              <!-- Botón Eliminar: fondo rojo tenue -->
+              <button data-tip="Eliminar"
+                class="action-btn bg-red-500 bg-opacity-10 text-red-400 border-red-500 border-opacity-30 hover:bg-opacity-20"
+                onclick="deleteMoto(${moto.id})">
+                🗑️
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);   /* Agrega la fila al tbody */
+      });
+
+      /* Actualiza el contador de registros mostrados          */
+      document.getElementById('showingCount').textContent = data.length;
+      document.getElementById('recordCount').textContent  = `${data.length} registros encontrados`;
+    }
+
+    /* ── 4. FILTRO DE BÚSQUEDA EN TIEMPO REAL ───────────────
+       Se ejecuta cada vez que el usuario teclea en el input   */
+    function filterTable() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      /* Filtra el array completo: busca en placa, marca, modelo */
+      const filtered = motosData.filter(m =>
+        m.placa.toLowerCase().includes(query)  ||
+        m.marca.toLowerCase().includes(query)  ||
+        m.modelo.toLowerCase().includes(query) ||
+        m.color.toLowerCase().includes(query)
+      );
+      renderTable(filtered);   /* Re-renderiza con resultados */
+    }
+
+    /* ── 5. ABRIR MODAL (modo nuevo) ───────────────────────── */
+    function openModal() {
+      editingId = null;         /* sin ID = modo crear */
+      document.getElementById('modalTitle').textContent = 'NUEVA MOTO';
+      document.getElementById('saveLabel').textContent  = '💾 GUARDAR MOTO';
+      clearForm();              /* limpia campos del formulario */
+      /* Genera el próximo ID autoincremental de ejemplo        */
+      document.getElementById('f_id').value = `Auto (#${motosData.length + 1})`;
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    /* ── 6. EDITAR MOTO ────────────────────────────────────── */
+    function editMoto(id) {
+      /* Busca el objeto moto en el array por su id            */
+      const moto = motosData.find(m => m.id === id);
+      if (!moto) return;
+
+      editingId = id;           /* guarda el ID en edición     */
+      document.getElementById('modalTitle').textContent = 'EDITAR MOTO';
+      document.getElementById('saveLabel').textContent  = '💾 ACTUALIZAR';
+
+      /* Rellena cada campo del formulario con los datos actuales */
+      document.getElementById('f_id').value         = moto.id;
+      document.getElementById('f_placa').value      = moto.placa;
+      document.getElementById('f_marca').value      = moto.marca;
+      document.getElementById('f_modelo').value     = moto.modelo;
+      document.getElementById('f_cilindraje').value = moto.cc;
+      document.getElementById('f_anio').value       = moto.anio;
+      document.getElementById('f_color').value      = moto.color;
+      document.getElementById('f_cliente').value    = moto.cli;
+      document.getElementById('f_estado').value     = moto.estado;
+
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    /* ── 7. GUARDAR / ACTUALIZAR MOTO ──────────────────────── */
+    function saveMoto() {
+      /* Lee los valores de cada campo del formulario           */
+      const placa  = document.getElementById('f_placa').value.trim();
+      const marca  = document.getElementById('f_marca').value;
+      const modelo = document.getElementById('f_modelo').value.trim();
+      const cc     = parseInt(document.getElementById('f_cilindraje').value);
+      const anio   = parseInt(document.getElementById('f_anio').value);
+      const color  = document.getElementById('f_color').value.trim();
+      const cli    = parseInt(document.getElementById('f_cliente').value);
+      const estado = document.getElementById('f_estado').value;
+
+      /* Validación básica: campos NOT NULL según diccionario   */
+      if (!placa || !marca || !modelo || !cc || !anio || !cli) {
+        alert('⚠️ Por favor completa todos los campos obligatorios.');
+        return;
+      }
+
+      if (editingId === null) {
+        /* MODO CREAR: agrega nuevo objeto al array             */
+        const newId = Math.max(...motosData.map(m => m.id)) + 1;
+        motosData.push({ id: newId, placa, marca, modelo, cc, anio, color, cli, estado });
+      } else {
+        /* MODO EDITAR: busca y actualiza el objeto existente   */
+        const idx = motosData.findIndex(m => m.id === editingId);
+        motosData[idx] = { id: editingId, placa, marca, modelo, cc, anio, color, cli, estado };
+      }
+
+      updateStats();   /* recalcula los contadores de las cards */
+      renderTable(motosData);
+      closeModal();
+    }
+
+    /* ── 8. ELIMINAR MOTO ──────────────────────────────────── */
+    function deleteMoto(id) {
+      if (!confirm(`¿Eliminar la moto con ID #${id}?`)) return;
+      /* filter: crea nuevo array sin el elemento eliminado     */
+      motosData = motosData.filter(m => m.id !== id);
+      updateStats();
+      renderTable(motosData);
+    }
+
+    /* ── 9. CERRAR MODAL ──────────────────────────────────── */
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+    /* Cierra el modal al hacer clic FUERA de la caja          */
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('modal')) closeModal();
+    }
+
+    /* ── 10. LIMPIAR FORMULARIO ────────────────────────────── */
+    function clearForm() {
+      ['f_id','f_placa','f_marca','f_modelo','f_cilindraje',
+       'f_anio','f_color','f_cliente'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('f_estado').value = 'activo';
+    }
+
+    /* ── 11. ACTUALIZAR ESTADÍSTICAS ──────────────────────── */
+    function updateStats() {
+      const total   = motosData.length;
+      const active  = motosData.filter(m => m.estado === 'activo').length;
+      const repair  = motosData.filter(m => m.estado === 'repair').length;
+      const waiting = motosData.filter(m => m.estado === 'waiting').length;
+
+      /* Actualiza los números en las cards de estadísticas     */
+      document.getElementById('statTotal').textContent   = total;
+      document.getElementById('statActive').textContent  = active;
+      document.getElementById('statRepair').textContent  = repair;
+      document.getElementById('statWaiting').textContent = waiting;
+    }
+
+    /* ── 12. FECHA ACTUAL ──────────────────────────────────── */
+    function setDate() {
+      const now = new Date();
+      /* toLocaleDateString: formato legible según locale       */
+      document.getElementById('currentDate').textContent =
+        now.toLocaleDateString('es-CO', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    }
+
+    /* ── INICIALIZACIÓN ────────────────────────────────────── */
+    /* Se ejecuta cuando el DOM está completamente cargado      */
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTable(motosData);   /* dibuja la tabla inicial      */
+      updateStats();            /* llena las cards de stats     */
+      setDate();                /* escribe la fecha en el header */
+    });
+
+  </script>
+</body>
+</html>

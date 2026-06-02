@@ -106,24 +106,17 @@
     <div class="divider mx-4 mb-5"></div>
 
     <!-- Navegación -->
-    <nav class="flex-1 px-3 space-y-1">
-      <a href="/dashboard"
-         class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-[10px]
-                text-[14px] font-semibold tracking-wide cursor-pointer">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
-             viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+  <nav class="flex-1 px-3 space-y-1">
+      <a href="#" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
           <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
         </svg>
         Dashboard
       </a>
-
-      {% if rol | lower == 'administrador' %}
-      <a href="/registrar"
-         class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px]
-                text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
-             viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      
+      <a href="/registrar" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
           <circle cx="9" cy="7" r="4"/>
           <line x1="19" y1="8" x2="19" y2="14"/>
@@ -131,13 +124,9 @@
         </svg>
         Registrar Usuario
       </a>
-      {% endif %}
 
-      <!-- Módulos futuros (deshabilitados) -->
-      <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px]
-                  text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
-             viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
           <circle cx="9" cy="7" r="4"/>
           <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -146,36 +135,36 @@
         Clientes
       </div>
 
-      <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px]
-                  text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
-             viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm11 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0z
-                   M2 9l2-4h9l3 4M7 9l1-4M13 9l2-4M2 9h20"/>
-        </svg>
-        Motos
-      </div>
+       <a href="/motos" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm11 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0z M2 9l2-4h9l3 4M7 9l1-4M13 9l2-4M2 9h20"/>
+         </svg>
+         Motos
+       </a>
 
-      <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px]
-                  text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
-             viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
         </svg>
         Productos
       </div>
 
       <a href="/proveedores" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-         <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/>
-          <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="3" width="15" height="13" rx="2"/>
+          <path d="M16 8h4l3 3v5h-7V8z"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/>
+          <circle cx="18.5" cy="18.5" r="2.5"/>
         </svg>
         Proveedores
       </a>
-      
-      <a href="/movimientos" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted hover:bg-neutral-100 hover:text-neutral-900 transition-colors duration-200 cursor-pointer">
+
+      <a href="/movimientos" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M4 4l5 5"/>
+          <polyline points="17 1 21 5 17 9"/>
+          <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/>
+          <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
         </svg>
         Movimientos
       </a>
