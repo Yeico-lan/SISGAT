@@ -536,6 +536,70 @@ def eliminar_moto(id):
         if cursor: cursor.close()
         if conn: conn.close()
 
+# ──────────────────────────────────────────
+#  FACTURACIÓN
+# ──────────────────────────────────────────
+@app.route('/facturacion', methods=['GET'])
+def facturacion_page():
+    if not session.get('usuario_id'):
+        return redirect(url_for('login_page'))
+
+    conn = get_connection()
+    facturas = []
+    if conn:
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT fac_id, fac_fecha_emision, fac_total, ord_id, cli_id
+                FROM facturas
+                ORDER BY fac_id DESC
+            """)
+            facturas = cursor.fetchall()
+            for f in facturas:
+                if f['fac_fecha_emision']:
+                    f['fac_fecha_emision'] = f['fac_fecha_emision'].strftime('%Y-%m-%d')
+        except Error as e:
+            print(f"[SELECT ERROR FACTURAS] {e}")
+        finally:
+            cursor.close()
+            conn.close()
+
+    return render_template('facturacion.html',
+                           facturas=facturas,
+                           nombre=session.get('usuario_nombre'),
+                           rol=session.get('usuario_rol'))
+
+
+@app.route('/facturacion', methods=['POST'])
+def guardar_factura():
+    if not session.get('usuario_id'):
+        return redirect(url_for('login_page'))
+
+    fecha   = request.form.get('fecha', '').strip()
+    total   = request.form.get('total', '').strip()
+    orden   = request.form.get('orden', '').strip()
+    cliente = request.form.get('cliente', '').strip()
+
+    if not all([fecha, total, orden, cliente]):
+        return redirect(url_for('facturacion_page'))
+
+    conn = get_connection()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO facturas (fac_fecha_emision, fac_total, ord_id, cli_id)
+                VALUES (%s, %s, %s, %s)
+            """, (fecha, total, orden, cliente))
+            conn.commit()
+        except Error as e:
+            print(f"[INSERT ERROR FACTURAS] {e}")
+        finally:
+            cursor.close()
+            conn.close()
+
+    return redirect(url_for('facturacion_page'))
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
 
