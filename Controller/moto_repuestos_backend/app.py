@@ -373,11 +373,12 @@ def api_movimientos():
 # =====================================
 @app.route('/motos')
 def modulo_motos():
-    # Quitamos el try-except para que el modo debug nos muestre el error real en el navegador
+    if not session.get('usuario_id'):
+        return redirect(url_for('login_page'))
+
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # 1. Consultar la lista de motos
     cursor.execute("""
         SELECT mot_id, mot_placa, mot_marca, mot_modelo, mot_cilindraje, mot_color, mot_estado, cli_id 
         FROM motos 
@@ -385,7 +386,6 @@ def modulo_motos():
     """)
     lista_motos = cursor.fetchall()
 
-    # 2. Consultar los conteos reales para las tarjetas superiores
     cursor.execute("SELECT COUNT(*) AS total FROM motos")
     total_motos = cursor.fetchone()['total']
 
@@ -401,22 +401,23 @@ def modulo_motos():
     cursor.close()
     conn.close()
 
-    # 3. Renderizar la plantilla enviándole todas las variables
     return render_template(
-        'motos.html', 
-        motos=lista_motos, 
-        total_motos=total_motos, 
-        en_servicio=en_servicio, 
-        en_reparacion=en_reparacion, 
-        en_espera=en_espera
+        'motos.html',
+        motos=lista_motos,
+        total_motos=total_motos,
+        en_servicio=en_servicio,
+        en_reparacion=en_reparacion,
+        en_espera=en_espera,
+        nombre=session.get('usuario_nombre'),
+        rol=session.get('usuario_rol')
     )
+
 
 @app.route('/api/motos', methods=['GET'])
 def obtener_motos():
     if not session.get('usuario_id'):
         return jsonify([])
 
-    # Inicializamos en None para evitar UnboundLocalError
     conn = None
     cursor = None
 
@@ -425,31 +426,21 @@ def obtener_motos():
         cursor = conn.cursor(dictionary=True)
 
         cursor.execute("""
-            SELECT
-                mot_id,
-                mot_placa,
-                mot_marca,
-                mot_modelo,
-                mot_cilindraje,
-                mot_color,
-                mot_estado,
-                cli_id
+            SELECT mot_id, mot_placa, mot_marca, mot_modelo,
+                   mot_cilindraje, mot_color, mot_estado, cli_id
             FROM motos
             ORDER BY mot_id ASC
         """)
 
         return jsonify(cursor.fetchall())
 
-    except Exception as e:  # 🌟 Captura segura de cualquier error
+    except Exception as e:
         print(f"Error en obtener_motos: {e}")
         return jsonify([])
 
     finally:
-        # 🌟 Cierre seguro solo si existen
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 @app.route('/api/motos', methods=['POST'])
@@ -467,46 +458,23 @@ def crear_moto():
 
         cursor.execute("""
             INSERT INTO motos
-            (
-                mot_placa,
-                mot_marca,
-                mot_modelo,
-                mot_cilindraje,
-                mot_color,
-                mot_estado,
-                cli_id
-            )
-            VALUES
-            (%s,%s,%s,%s,%s,%s,%s)
+            (mot_placa, mot_marca, mot_modelo, mot_cilindraje, mot_color, mot_estado, cli_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (
-            data['placa'],
-            data['marca'],
-            data['modelo'],
-            data['cilindraje'],
-            data['color'],
-            data['estado'],
-            data['cli_id']
+            data['placa'], data['marca'], data['modelo'],
+            data['cilindraje'], data['color'], data['estado'], data['cli_id']
         ))
 
         conn.commit()
+        return jsonify({'ok': True, 'mensaje': 'Moto creada con éxito'})
 
-        return jsonify({
-            'ok': True,
-            'mensaje': 'Moto creada con éxito'
-        })
-
-    except Exception as e:  # 🌟 Captura segura
+    except Exception as e:
         print(f"Error en crear_moto: {e}")
-        return jsonify({
-            'ok': False,
-            'mensaje': 'Error al crear moto'
-        })
+        return jsonify({'ok': False, 'mensaje': 'Error al crear moto'})
 
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 @app.route('/api/motos/<int:id>', methods=['PUT'])
@@ -524,45 +492,25 @@ def actualizar_moto(id):
 
         cursor.execute("""
             UPDATE motos
-            SET
-                mot_placa=%s,
-                mot_marca=%s,
-                mot_modelo=%s,
-                mot_cilindraje=%s,
-                mot_color=%s,
-                mot_estado=%s,
-                cli_id=%s
+            SET mot_placa=%s, mot_marca=%s, mot_modelo=%s,
+                mot_cilindraje=%s, mot_color=%s, mot_estado=%s, cli_id=%s
             WHERE mot_id=%s
         """, (
-            data['placa'],
-            data['marca'],
-            data['modelo'],
-            data['cilindraje'],
-            data['color'],
-            data['estado'],
-            data['cli_id'],
-            id
+            data['placa'], data['marca'], data['modelo'],
+            data['cilindraje'], data['color'], data['estado'],
+            data['cli_id'], id
         ))
 
         conn.commit()
+        return jsonify({'ok': True, 'mensaje': 'Moto actualizada con éxito'})
 
-        return jsonify({
-            'ok': True,
-            'mensaje': 'Moto actualizada con éxito'
-        })
-
-    except Exception as e:  # 🌟 Captura segura
+    except Exception as e:
         print(f"Error en actualizar_moto: {e}")
-        return jsonify({
-            'ok': False,
-            'mensaje': 'Error al actualizar'
-        })
+        return jsonify({'ok': False, 'mensaje': 'Error al actualizar'})
 
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 @app.route('/api/motos/<int:id>', methods=['DELETE'])
@@ -576,31 +524,17 @@ def eliminar_moto(id):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-
-        cursor.execute(
-            "DELETE FROM motos WHERE mot_id = %s",
-            (id,)
-        )
-
+        cursor.execute("DELETE FROM motos WHERE mot_id = %s", (id,))
         conn.commit()
+        return jsonify({'ok': True, 'mensaje': 'Moto eliminada con éxito'})
 
-        return jsonify({
-            'ok': True,
-            'mensaje': 'Moto eliminada con éxito'
-        })
-
-    except Exception as e:  # 🌟 Captura segura
+    except Exception as e:
         print(f"Error en eliminar_moto: {e}")
-        return jsonify({
-            'ok': False,
-            'mensaje': 'Error al eliminar'
-        })
+        return jsonify({'ok': False, 'mensaje': 'Error al eliminar'})
 
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
