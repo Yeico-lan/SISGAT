@@ -549,15 +549,53 @@ def facturacion_page():
     if conn:
         try:
             cursor = conn.cursor(dictionary=True)
+            # Trae todas las facturas con sus detalles en JOIN
             cursor.execute("""
-                SELECT fac_id, fac_fecha_emision, fac_total, ord_id, cli_id
-                FROM facturas
-                ORDER BY fac_id DESC
+                SELECT
+                    f.fac_id,
+                    f.fac_fecha_emision,
+                    f.fac_total,
+                    f.ord_id,
+                    f.cli_id,
+                    d.det_fact_id,
+                    d.prod_id,
+                    d.det_fact_cant,
+                    d.precio_unitario,
+                    d.subtotal,
+                    d.det_fact_servicio,
+                    d.usu_id
+                FROM facturacion f
+                LEFT JOIN detalle_facturas d ON d.fac_id = f.fac_id
+                ORDER BY f.fac_id DESC, d.det_fact_id ASC
             """)
-            facturas = cursor.fetchall()
-            for f in facturas:
-                if f['fac_fecha_emision']:
-                    f['fac_fecha_emision'] = f['fac_fecha_emision'].strftime('%Y-%m-%d')
+            rows = cursor.fetchall()
+
+            # Agrupar detalles por factura
+            facturas_dict = {}
+            for row in rows:
+                fid = row['fac_id']
+                if fid not in facturas_dict:
+                    facturas_dict[fid] = {
+                        'fac_id':            row['fac_id'],
+                        'fac_fecha_emision': row['fac_fecha_emision'].strftime('%Y-%m-%d') if row['fac_fecha_emision'] else '',
+                        'fac_total':         row['fac_total'],
+                        'ord_id':            row['ord_id'],
+                        'cli_id':            row['cli_id'],
+                        'detalles':          []
+                    }
+                if row['det_fact_id']:
+                    facturas_dict[fid]['detalles'].append({
+                        'det_fact_id':       row['det_fact_id'],
+                        'prod_id':           row['prod_id'],
+                        'det_fact_cant':     row['det_fact_cant'],
+                        'precio_unitario':   row['precio_unitario'],
+                        'subtotal':          row['subtotal'],
+                        'det_fact_servicio': row['det_fact_servicio'],
+                        'usu_id':            row['usu_id'],
+                    })
+
+            facturas = list(facturas_dict.values())
+
         except Error as e:
             print(f"[SELECT ERROR FACTURAS] {e}")
         finally:
@@ -588,7 +626,7 @@ def guardar_factura():
         try:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO facturas (fac_fecha_emision, fac_total, ord_id, cli_id)
+                INSERT INTO facturacion (fac_fecha_emision, fac_total, ord_id, cli_id)
                 VALUES (%s, %s, %s, %s)
             """, (fecha, total, orden, cliente))
             conn.commit()
