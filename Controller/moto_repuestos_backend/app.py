@@ -7,7 +7,7 @@ import sys
 # ──────────────────────────────────────────
 #  IMPORTAR DB DESDE MODEL
 # ──────────────────────────────────────────
-sys.path.append(r'C:\Users\javie\OneDrive\Documentos\GitHub\SISGAT\Model')
+sys.path.append(r'C:\Users\Soportepq\Documents\GitHub\SISGAT\Model')
 from db import get_connection, Error
 
 # ──────────────────────────────────────────

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facturación | MOTO LEON RACING</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        bg:      '#222831',
+        surface: '#393E46',
+        side:    '#1e2129',
+        gold:    '#FFD369',
+        muted:   '#8b8fa8',
+      },
+      fontFamily: {
+        bebas:    ['"Bebas Neue"', 'sans-serif'],
+        rajdhani: ['Rajdhani', 'sans-serif'],
+      },
+      keyframes: {
+        fadeIn:   { '0%':{ opacity:'0', transform:'translateY(14px)' }, '100%':{ opacity:'1', transform:'translateY(0)' } },
+        gridMove: { '0%':{ backgroundPosition:'0 0' }, '100%':{ backgroundPosition:'48px 48px' } },
+        pulseglow:{ '0%,100%':{ opacity:'1' }, '50%':{ opacity:'.5' } },
+      },
+      animation: {
+        fadeIn:    'fadeIn .5s ease both',
+        gridMove:  'gridMove 20s linear infinite',
+        pulseglow: 'pulseglow 3s ease-in-out infinite',
+      },
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Rajdhani', sans-serif; }
+  .bg-grid::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,211,105,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,211,105,.045) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none; z-index: 0;
+  }
+  .divider { height:1px; background:linear-gradient(90deg,transparent,rgba(255,211,105,.2),transparent); }
+  .nav-link { transition: background .15s, color .15s; }
+  .nav-link:hover { background: rgba(255,211,105,.08); color: #FFD369; }
+  .nav-link.active { background: rgba(255,211,105,.12); color: #FFD369; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,211,105,.15); border-radius: 2px; }
+</style>
+</head>
+
+<body class="bg-grid min-h-screen bg-bg text-white flex">
+
+<!-- SIDEBAR -->
+<aside class="relative z-10 w-[220px] flex-shrink-0 bg-side flex flex-col border-r border-gold/10 min-h-screen">
+  <div class="px-6 pt-8 pb-6">
+    <div class="w-46 h-46 mb-4">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Moto León Racing" class="w-full h-full object-contain">
+    </div>
+    <h2 class="font-bebas text-[17px] tracking-[3px] text-gold leading-none">MOTO LEON</h2>
+    <p class="text-[10px] text-muted tracking-[2px] uppercase mt-0.5">Racing Panel</p>
+  </div>
+  <div class="divider mx-4 mb-5"></div>
+  <nav class="flex-1 px-3 space-y-1">
+    <a href="/dashboard" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="/registrar" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      Registrar Usuario
+    </a>
+    <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </div>
+    <a href="/motos" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm11 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0zM2 9l2-4h9l3 4M7 9l1-4M13 9l2-4M2 9h20"/></svg>
+      Motos
+    </a>
+    <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      Productos
+    </div>
+    <a href="/proveedores" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      Proveedores
+    </a>
+    <a href="/movimientos" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      Movimientos
+    </a>
+    <a href="/facturacion" class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide cursor-pointer">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l2 2 4-4"/><path d="M21 12V5H3v7"/><path d="M3 10h18"/><path d="M5 20h14"/><path d="M7 16h10"/></svg>
+      Facturación
+    </a>
+  </nav>
+  <div class="divider mx-4 mb-4"></div>
+  <div class="px-4 pb-6">
+    <div class="flex items-center gap-3 px-3 py-3 rounded-[10px] bg-bg/60">
+      <div class="w-8 h-8 bg-gold/20 rounded-full flex items-center justify-center flex-shrink-0">
+        <svg class="w-4 h-4 text-gold" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-[13px] font-semibold text-white truncate">{{ nombre }}</p>
+        <p class="text-[11px] text-gold truncate">{{ rol }}</p>
+      </div>
+      <a href="/logout" title="Cerrar sesión" class="text-muted hover:text-gold transition-colors duration-150 flex-shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="relative z-10 flex-1 px-8 py-8 overflow-y-auto">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-start mb-8 animate-fadeIn">
+    <div>
+      <h1 class="font-bebas text-[32px] tracking-[3px] text-white leading-none">Facturación</h1>
+      <p class="text-[13px] text-muted mt-1">Gestión de facturas del sistema</p>
+    </div>
+    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 text-gold text-[13px] font-semibold tracking-widest">
+      <span class="w-1.5 h-1.5 bg-gold rounded-full animate-pulseglow"></span>
+      {{ rol | upper }}
+    </span>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="bg-surface rounded-2xl p-6 border border-gold/10 mb-8 animate-fadeIn">
+    <h2 class="font-bebas text-[22px] tracking-[3px] text-gold mb-6">NUEVA FACTURA</h2>
+    <form method="POST" action="/facturacion" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div>
+        <label class="block mb-2 text-[11px] tracking-[2px] uppercase text-muted font-semibold">Fecha</label>
+        <input type="date" name="fecha" required class="w-full bg-bg border border-gold/15 rounded-[10px] p-3 text-white outline-none focus:border-gold transition-colors">
+      </div>
+      <div>
+        <label class="block mb-2 text-[11px] tracking-[2px] uppercase text-muted font-semibold">Total</label>
+        <input type="number" name="total" step="0.01" min="0" required class="w-full bg-bg border border-gold/15 rounded-[10px] p-3 text-white outline-none focus:border-gold transition-colors">
+      </div>
+      <div>
+        <label class="block mb-2 text-[11px] tracking-[2px] uppercase text-muted font-semibold">ID Orden</label>
+        <input type="number" name="orden" min="1" required class="w-full bg-bg border border-gold/15 rounded-[10px] p-3 text-white outline-none focus:border-gold transition-colors">
+      </div>
+      <div>
+        <label class="block mb-2 text-[11px] tracking-[2px] uppercase text-muted font-semibold">ID Cliente</label>
+        <input type="number" name="cliente" min="1" required class="w-full bg-bg border border-gold/15 rounded-[10px] p-3 text-white outline-none focus:border-gold transition-colors">
+      </div>
+      <div class="md:col-span-2">
+        <button type="submit" class="bg-gold text-bg font-bebas tracking-[2px] text-[15px] px-8 py-3 rounded-[10px] shadow-[0_8px_24px_rgba(255,211,105,.3)] hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(255,211,105,.4)] active:translate-y-0 transition-all duration-150">
+          GUARDAR FACTURA
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- FACTURAS -->
+  <div class="space-y-6 animate-fadeIn" style="animation-delay:.1s">
+
+    {% for factura in facturas %}
+    <!-- TARJETA DE FACTURA -->
+    <div class="bg-surface rounded-2xl border border-gold/10 overflow-hidden shadow-lg">
+
+      <!-- ENCABEZADO FACTURA -->
+      <div class="px-6 py-4 bg-bg/40 border-b border-white/5 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-4">
+          <div>
+            <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold">Factura</p>
+            <p class="font-bebas text-[22px] tracking-[2px] text-gold leading-none">#{{ "%04d"|format(factura.fac_id) }}</p>
+          </div>
+          <div class="w-px h-8 bg-white/10"></div>
+          <div>
+            <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold">Fecha</p>
+            <p class="text-[14px] font-semibold text-white">{{ factura.fac_fecha_emision }}</p>
+          </div>
+          <div class="w-px h-8 bg-white/10"></div>
+          <div>
+            <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold">ID Orden</p>
+            <p class="text-[14px] font-semibold text-white">{{ factura.ord_id }}</p>
+          </div>
+          <div class="w-px h-8 bg-white/10"></div>
+          <div>
+            <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold">ID Cliente</p>
+            <p class="text-[14px] font-semibold text-white">{{ factura.cli_id }}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-[10px] tracking-[2px] uppercase text-muted font-semibold">Total Factura</p>
+          <p class="font-bebas text-[28px] tracking-[2px] text-gold leading-none">$ {{ "%.2f"|format(factura.fac_total) }}</p>
+        </div>
+      </div>
+
+      <!-- TABLA DE DETALLES -->
+      {% if factura.detalles %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-[13px]">
+          <thead>
+            <tr class="border-b border-white/5">
+              <th class="px-5 py-3 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Det. ID</th>
+              <th class="px-5 py-3 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Prod. ID</th>
+              <th class="px-5 py-3 text-center text-[10px] tracking-[2px] uppercase text-muted font-semibold">Cantidad</th>
+              <th class="px-5 py-3 text-right text-[10px] tracking-[2px] uppercase text-muted font-semibold">Precio Unit.</th>
+              <th class="px-5 py-3 text-right text-[10px] tracking-[2px] uppercase text-muted font-semibold">Servicio</th>
+              <th class="px-5 py-3 text-right text-[10px] tracking-[2px] uppercase text-muted font-semibold">Subtotal</th>
+              <th class="px-5 py-3 text-center text-[10px] tracking-[2px] uppercase text-muted font-semibold">Usu. ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for det in factura.detalles %}
+            <tr class="border-b border-white/5 hover:bg-white/[.02] transition-colors">
+              <td class="px-5 py-3 font-mono text-muted">#{{ det.det_fact_id }}</td>
+              <td class="px-5 py-3 text-white font-semibold">{{ det.prod_id }}</td>
+              <td class="px-5 py-3 text-center font-mono text-white">{{ det.det_fact_cant if det.det_fact_cant else '—' }}</td>
+              <td class="px-5 py-3 text-right font-mono text-white/70">
+                {% if det.precio_unitario %}$ {{ "%.2f"|format(det.precio_unitario) }}{% else %}—{% endif %}
+              </td>
+              <td class="px-5 py-3 text-right font-mono text-white/70">
+                {% if det.det_fact_servicio %}$ {{ "%.2f"|format(det.det_fact_servicio) }}{% else %}—{% endif %}
+              </td>
+              <td class="px-5 py-3 text-right font-bebas text-[15px] tracking-[1px] text-gold">$ {{ "%.2f"|format(det.subtotal) }}</td>
+              <td class="px-5 py-3 text-center text-muted">{{ det.usu_id }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="px-6 py-6 text-center text-muted text-sm">Sin detalles registrados para esta factura.</div>
+      {% endif %}
+
+    </div>
+    {% else %}
+    <div class="bg-surface rounded-2xl border border-gold/10 px-6 py-12 text-center text-muted text-sm">
+      No hay facturas registradas.
+    </div>
+    {% endfor %}
+
+  </div>
+
+</main>
+</body>
+</html>
