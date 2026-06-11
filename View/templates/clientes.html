@@ -486,25 +486,18 @@
   </div>
 
 <script>
-const CLIENTS_DATA = [
-  { id:'C001', name:'Carlos Ramírez',   cedula:'1020345678', phone:'310 234 5678', email:'carlos.r@mail.com',  city:'Bogotá',       status:'Activo' },
-  { id:'C002', name:'Lucía Morales',    cedula:'1098765432', phone:'315 876 5432', email:'lucia.m@mail.com',   city:'Medellín',     status:'Activo' },
-  { id:'C003', name:'Andrés Torres',    cedula:'1122334455', phone:'320 112 3344', email:'andres.t@mail.com',  city:'Cali',         status:'Inactivo' },
-  { id:'C004', name:'Valentina Cruz',   cedula:'1045678901', phone:'317 456 7890', email:'vale.c@mail.com',    city:'Bogotá',       status:'Activo' },
-  { id:'C005', name:'Sebastián Ruiz',   cedula:'1067891234', phone:'312 789 1234', email:'seba.r@mail.com',   city:'Barranquilla', status:'Activo' },
-  { id:'C006', name:'Daniela Gómez',    cedula:'1034567890', phone:'313 345 6789', email:'dani.g@mail.com',   city:'Bogotá',       status:'Pendiente' },
-  { id:'C007', name:'Felipe Herrera',   cedula:'1078901234', phone:'318 890 1234', email:'felipe.h@mail.com', city:'Bucaramanga',  status:'Activo' },
-  { id:'C008', name:'Mariana López',    cedula:'1056789012', phone:'316 567 8901', email:'mariana.l@mail.com',city:'Medellín',     status:'Activo' },
-  { id:'C009', name:'Camilo Vargas',    cedula:'1089012345', phone:'311 901 2345', email:'camilo.v@mail.com', city:'Cali',         status:'Inactivo' },
-  { id:'C010', name:'Natalia Peña',     cedula:'1023456789', phone:'319 234 5679', email:'natalia.p@mail.com',city:'Bogotá',       status:'Activo' },
-  { id:'C011', name:'Julián Ríos',      cedula:'1091234567', phone:'314 123 4567', email:'julian.r@mail.com', city:'Pereira',      status:'Activo' },
-  { id:'C012', name:'Paola Jiménez',    cedula:'1012345678', phone:'321 234 5670', email:'paola.j@mail.com',  city:'Manizales',    status:'Inactivo' },
+let clients = [
+{% for cliente in clientes %}
+{
+    id: {{ cliente.cli_id }},
+    nombre: "{{ cliente.cli_nombre }}",
+    apellido: "{{ cliente.cli_apellido }}",
+    telefono: "{{ cliente.cli_telefono }}",
+    correo: "{{ cliente.cli_correo or '' }}",
+    direccion: "{{ cliente.cli_direccion or '' }}"
+},
+{% endfor %}
 ];
-
-let clients = [...CLIENTS_DATA];
-let filtered = [...clients];
-let page = 1;
-const PER = 8;
 
 function initials(name) {
   return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
@@ -515,68 +508,71 @@ function pillClass(s) {
 }
 
 function updateStats() {
-  document.getElementById('stat-total').textContent   = clients.length;
-  document.getElementById('stat-active').textContent  = clients.filter(c=>c.status==='Activo').length;
-  document.getElementById('stat-inactive').textContent= clients.filter(c=>c.status==='Inactivo').length;
-  document.getElementById('stat-pending').textContent = clients.filter(c=>c.status==='Pendiente').length;
+
+    document.getElementById('stat-total').textContent = clients.length;
+
+    document.getElementById('stat-active').textContent = clients.length;
+
+    document.getElementById('stat-inactive').textContent = 0;
+
+    document.getElementById('stat-pending').textContent = 0;
 }
 
 function render() {
   const tbody = document.getElementById('clients-tbody');
-  const total = filtered.length;
-  const start = (page-1)*PER;
-  const slice = filtered.slice(start, start+PER);
-  const end   = Math.min(start+PER, total);
 
-  document.getElementById('badge-count').textContent = total;
-  const info = total ? `Mostrando ${start+1}–${end} de ${total}` : 'Sin resultados';
-  document.getElementById('pag-info').textContent        = info;
-  document.getElementById('pag-info-bottom').textContent = total ? `${info} clientes` : 'Sin resultados';
+  tbody.innerHTML = '';
 
-  if (!slice.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-12 text-center text-muted text-[13px]">
-      <svg class="w-8 h-8 mx-auto mb-3 text-muted/40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      No se encontraron clientes
-    </td></tr>`;
-  } else {
-    tbody.innerHTML = slice.map(c => `
-      <tr class="table-row border-b border-white/[0.04] cursor-pointer" onclick="openDetail('${c.id}')">
-        <td class="px-6 py-3">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gold/15 flex items-center justify-center text-[11px] font-bold text-gold flex-shrink-0">${initials(c.name)}</div>
-            <div>
-              <p class="text-[13px] font-semibold text-white leading-tight">${c.name}</p>
-              <p class="text-[10px] text-muted">${c.id}</p>
-            </div>
-          </div>
+  if (!clients.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="px-6 py-12 text-center text-muted">
+          No hay clientes registrados
         </td>
-        <td class="px-4 py-3 text-[13px] text-white/70 font-medium">${c.cedula}</td>
-        <td class="px-4 py-3 text-[13px] text-white/70">${c.phone}</td>
-        <td class="px-4 py-3 text-[13px] text-muted">${c.email}</td>
-        <td class="px-4 py-3 text-[13px] text-white/70">${c.city}</td>
-        <td class="px-4 py-3">
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${pillClass(c.status)}">
-            <span class="w-1.5 h-1.5 rounded-full bg-current"></span>${c.status}
-          </span>
-        </td>
-        <td class="px-4 py-3">
-          <div class="flex items-center gap-1.5" onclick="event.stopPropagation()">
-            <button class="action-btn" title="Ver detalle" onclick="openDetail('${c.id}')">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-            <button class="action-btn" title="Editar">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
-            <button class="action-btn danger" title="Eliminar" onclick="deleteClient('${c.id}'); event.stopPropagation()">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
-          </div>
-        </td>
-      </tr>`).join('');
+      </tr>`;
+    return;
   }
 
-  renderPagination(total);
-  updateStats();
+  clients.forEach(c => {
+
+    tbody.innerHTML += `
+      <tr class="table-row border-b border-white/[0.04]">
+
+        <td class="px-6 py-3">
+          ${c.nombre} ${c.apellido}
+        </td>
+
+        <td class="px-4 py-3">
+          ${c.id}
+        </td>
+
+        <td class="px-4 py-3">
+          ${c.telefono}
+        </td>
+
+        <td class="px-4 py-3">
+          ${c.correo || ''}
+        </td>
+
+        <td class="px-4 py-3">
+          ${c.direccion || ''}
+        </td>
+
+        <td class="px-4 py-3">
+          Activo
+        </td>
+
+        <td class="px-4 py-3">
+          <button onclick="deleteClient(${c.id})">
+            Eliminar
+          </button>
+        </td>
+
+      </tr>
+    `;
+  });
+
+  document.getElementById('badge-count').textContent = clients.length;
 }
 
 function renderPagination(total) {
@@ -601,16 +597,17 @@ function changePage(p) {
 }
 
 function applyFilters() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const s = document.getElementById('status-filter').value;
-  const c = document.getElementById('city-filter').value;
-  filtered = clients.filter(x => {
-    const mq = !q || x.name.toLowerCase().includes(q) || x.cedula.includes(q) || x.email.toLowerCase().includes(q);
-    const ms = s === 'all' || x.status === s;
-    const mc = c === 'all' || x.city === c;
-    return mq && ms && mc;
-  });
-  page = 1; render();
+
+    const q = document.getElementById('search-input').value.toLowerCase();
+
+    filtered = clients.filter(c =>
+        (`${c.nombre} ${c.apellido}`).toLowerCase().includes(q) ||
+        c.telefono.toLowerCase().includes(q) ||
+        (c.correo || '').toLowerCase().includes(q)
+    );
+
+    clients = filtered;
+    render();
 }
 
 // Modal
@@ -623,25 +620,44 @@ function closeModal() {
   document.getElementById('modal-error').classList.add('hidden');
 }
 
-function addClient() {
-  const name   = document.getElementById('new-name').value.trim();
-  const cedula = document.getElementById('new-cedula').value.trim();
-  const phone  = document.getElementById('new-phone').value.trim();
-  const email  = document.getElementById('new-email').value.trim();
-  const city   = document.getElementById('new-city').value;
-  const status = document.getElementById('new-status').value;
-  const errEl  = document.getElementById('modal-error');
+async function addClient() {
 
-  if (!name || !cedula || !phone || !email || !city) {
-    errEl.textContent = 'Por favor completa todos los campos.';
-    errEl.classList.remove('hidden'); return;
-  }
-  errEl.classList.add('hidden');
-  const newId = 'C' + String(clients.length + 1).padStart(3,'0');
-  clients.push({ id:newId, name, cedula, phone, email, city, status });
-  filtered = [...clients];
-  applyFilters();
-  closeModal();
+    const nombreCompleto = document.getElementById('new-name').value.trim();
+    const telefono = document.getElementById('new-phone').value.trim();
+    const correo = document.getElementById('new-email').value.trim();
+    const direccion = document.getElementById('new-city').value.trim();
+
+    if (!nombreCompleto || !telefono) {
+        alert('Nombre y teléfono son obligatorios');
+        return;
+    }
+
+    let partes = nombreCompleto.split(' ');
+    let nombre = partes[0];
+    let apellido = partes.slice(1).join(' ');
+
+    const response = await fetch('/api/clientes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            nombre: nombre,
+            apellido: apellido,
+            telefono: telefono,
+            correo: correo,
+            direccion: direccion
+        })
+    });
+
+    const data = await response.json();
+
+    if (data.ok) {
+        alert(data.mensaje);
+        location.reload();
+    } else {
+        alert(data.mensaje);
+    }
 }
 
 // Detail panel
@@ -670,12 +686,25 @@ function openDetail(id) {
 }
 function closeDetail() { document.getElementById('detail-panel').classList.remove('open'); }
 
-function deleteClient(id) {
-  if (!confirm('¿Eliminar este cliente?')) return;
-  clients = clients.filter(c => c.id !== id);
-  applyFilters();
-}
+async function deleteClient(id) {
 
+    if (!confirm('¿Deseas eliminar este cliente?')) {
+        return;
+    }
+
+    const response = await fetch(`/api/clientes/${id}`, {
+        method: 'DELETE'
+    });
+
+    const data = await response.json();
+
+    if (data.ok) {
+        alert(data.mensaje);
+        location.reload();
+    } else {
+        alert(data.mensaje);
+    }
+}
 document.getElementById('search-input').addEventListener('input', applyFilters);
 document.getElementById('status-filter').addEventListener('change', applyFilters);
 document.getElementById('city-filter').addEventListener('change', applyFilters);
