@@ -132,7 +132,7 @@
           Correo electrónico <span class="text-gold">*</span>
         </label>
         <div class="input-wrap relative">
-          <input type="email" id="correo" placeholder="usuario@taller.com" autocomplete="off"
+          <input type="email" id="correo" placeholder="usuario@correo.com" autocomplete="off"
                  class="input-field w-full py-[11px] pl-[38px] pr-3
                         bg-bg border border-gold/15 rounded-[10px]
                         text-white text-[14px] font-medium transition-all duration-200"/>
@@ -320,7 +320,17 @@
     void el.offsetWidth;
     el.style.animation = 'shake .35s ease';
   }
-</script>
+  
+  document.getElementById("formUsuario").addEventListener("submit", function(e) {
+    const correo = document.getElementById("correo").value.trim();
 
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!regex.test(correo)) {
+        e.preventDefault();
+        alert("Ingrese un correo electrónico válido.");
+    }
+});
+</script>
 </body>
 </html>

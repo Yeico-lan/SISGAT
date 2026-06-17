@@ -3,6 +3,7 @@ from functools import wraps
 import hashlib
 import os
 import sys
+import re
 
 # ──────────────────────────────────────────
 #  IMPORTAR DB DESDE MODEL
@@ -144,6 +145,8 @@ def registrar_page():
                            rol=session.get('usuario_rol'))
 
 
+EMAIL_REGEX = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+
 @app.route('/api/registrar', methods=['POST'])
 @solo_admin
 def api_registrar():
@@ -157,6 +160,9 @@ def api_registrar():
 
     if not all([nombre, apellido, correo, id_rol, contrasena]):
         return jsonify({'ok': False, 'mensaje': 'Completa todos los campos obligatorios'}), 400
+
+    if not EMAIL_REGEX.match(correo):
+        return jsonify({'ok': False, 'mensaje': 'Ingresa un correo electrónico válido (ej: usuario@dominio.com)'}), 400
 
     if len(contrasena) < 6:
         return jsonify({'ok': False, 'mensaje': 'La contraseña debe tener mínimo 6 caracteres'}), 400
@@ -380,9 +386,12 @@ def modulo_motos():
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT mot_id, mot_placa, mot_marca, mot_modelo, mot_cilindraje, mot_color, mot_estado, cli_id 
-        FROM motos 
-        ORDER BY mot_id ASC
+        SELECT m.mot_id, m.mot_placa, m.mot_marca, m.mot_modelo, m.mot_cilindraje,
+               m.mot_color, m.mot_estado, m.cli_id,
+               CONCAT(c.cli_nombre, ' ', c.cli_apellido) AS cli_nombre_completo
+        FROM motos m
+        LEFT JOIN clientes c ON c.cli_id = m.cli_id
+        ORDER BY m.mot_id ASC
     """)
     lista_motos = cursor.fetchall()
 
@@ -426,10 +435,12 @@ def obtener_motos():
         cursor = conn.cursor(dictionary=True)
 
         cursor.execute("""
-            SELECT mot_id, mot_placa, mot_marca, mot_modelo,
-                   mot_cilindraje, mot_color, mot_estado, cli_id
-            FROM motos
-            ORDER BY mot_id ASC
+            SELECT m.mot_id, m.mot_placa, m.mot_marca, m.mot_modelo,
+                   m.mot_cilindraje, m.mot_color, m.mot_estado, m.cli_id,
+                   CONCAT(c.cli_nombre, ' ', c.cli_apellido) AS cli_nombre_completo
+            FROM motos m
+            LEFT JOIN clientes c ON c.cli_id = m.cli_id
+            ORDER BY m.mot_id ASC
         """)
 
         return jsonify(cursor.fetchall())
@@ -441,7 +452,6 @@ def obtener_motos():
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
-
 
 @app.route('/api/motos', methods=['POST'])
 def crear_moto():
