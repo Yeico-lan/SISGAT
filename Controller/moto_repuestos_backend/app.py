@@ -638,6 +638,142 @@ def guardar_factura():
 
     return redirect(url_for('facturacion_page'))
 
+# ──────────────────────────────────────────
+#  CLIENTES
+# ──────────────────────────────────────────
+@app.route('/clientes', methods=['GET'])
+def clientes_page():
+    if not session.get('usuario_id'):
+        return redirect(url_for('login_page'))
+
+    conn = get_connection()
+    clientes = []
+    if conn:
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT cli_id, cli_nombre, cli_apellido, cli_telefono,
+                       cli_correo, cli_direccion
+                FROM clientes
+                ORDER BY cli_nombre
+            """)
+            clientes = cursor.fetchall()
+        except Error as e:
+            print(f"[SELECT ERROR CLIENTES] {e}")
+        finally:
+            cursor.close()
+            conn.close()
+
+    return render_template('clientes.html',
+                           clientes=clientes,
+                           nombre=session.get('usuario_nombre'),
+                           rol=session.get('usuario_rol'))
+
+
+@app.route('/api/clientes', methods=['POST'])
+def api_registrar_cliente():
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401
+
+    data      = request.get_json(force=True)
+    nombre    = data.get('nombre', '').strip()
+    apellido  = data.get('apellido', '').strip()
+    telefono  = data.get('telefono', '').strip()
+    correo    = data.get('correo', '').strip()
+    direccion = data.get('direccion', '').strip()
+
+    if not nombre or not apellido or not telefono:
+        return jsonify({'ok': False, 'mensaje': 'Nombre, apellido y teléfono son obligatorios'}), 400
+
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión con la base de datos'}), 500
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            INSERT INTO clientes (cli_nombre, cli_apellido, cli_telefono, cli_correo, cli_direccion)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (nombre, apellido, telefono, correo or None, direccion or None))
+        conn.commit()
+        return jsonify({'ok': True, 'mensaje': f'Cliente "{nombre} {apellido}" registrado con éxito.'})
+
+    except Error as e:
+        print(f"[INSERT ERROR CLIENTE] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al guardar el cliente'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/api/clientes/<int:id>', methods=['PUT'])
+def api_actualizar_cliente(id):
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401
+
+    data      = request.get_json(force=True)
+    nombre    = data.get('nombre', '').strip()
+    apellido  = data.get('apellido', '').strip()
+    telefono  = data.get('telefono', '').strip()
+    correo    = data.get('correo', '').strip()
+    direccion = data.get('direccion', '').strip()
+
+    if not nombre or not apellido or not telefono:
+        return jsonify({'ok': False, 'mensaje': 'Nombre, apellido y teléfono son obligatorios'}), 400
+
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión con la base de datos'}), 500
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE clientes
+            SET cli_nombre=%s, cli_apellido=%s, cli_telefono=%s,
+                cli_correo=%s, cli_direccion=%s
+            WHERE cli_id=%s
+        """, (nombre, apellido, telefono, correo or None, direccion or None, id))
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({'ok': False, 'mensaje': 'Cliente no encontrado'}), 404
+
+        return jsonify({'ok': True, 'mensaje': 'Cliente actualizado con éxito'})
+
+    except Error as e:
+        print(f"[UPDATE ERROR CLIENTE] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al actualizar el cliente'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/api/clientes/<int:id>', methods=['DELETE'])
+def api_eliminar_cliente(id):
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401
+
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión con la base de datos'}), 500
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM clientes WHERE cli_id = %s", (id,))
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({'ok': False, 'mensaje': 'Cliente no encontrado'}), 404
+
+        return jsonify({'ok': True, 'mensaje': 'Cliente eliminado con éxito'})
+
+    except Error as e:
+        print(f"[DELETE ERROR CLIENTE] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al eliminar el cliente'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
 
