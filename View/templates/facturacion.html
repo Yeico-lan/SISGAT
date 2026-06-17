@@ -68,6 +68,7 @@ tailwind.config = {
     <p class="text-[10px] text-muted tracking-[2px] uppercase mt-0.5">Racing Panel</p>
   </div>
   <div class="divider mx-4 mb-5"></div>
+  
   <nav class="flex-1 px-3 space-y-1">
     <a href="/dashboard" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
       <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -77,6 +78,12 @@ tailwind.config = {
       <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
       Registrar Usuario
     </a>
+    
+    <a href="/clientes" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      Clientes
+    </a>
+
     <a href="/motos" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
       <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M5 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm11 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0zM2 9l2-4h9l3 4M7 9l1-4M13 9l2-4M2 9h20"/></svg>
       Motos
@@ -132,7 +139,6 @@ tailwind.config = {
     </div>
     
     <form method="POST" action="/facturacion" class="p-6 space-y-6">
-      
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div>
           <label class="block mb-2 text-[11px] tracking-[2px] uppercase text-muted font-semibold">Fecha Emisión</label>
@@ -230,7 +236,6 @@ tailwind.config = {
           EMITIR Y GUARDAR FACTURA VIRTUAL
         </button>
       </div>
-
     </form>
   </div>
 
@@ -239,7 +244,6 @@ tailwind.config = {
 
     {% for factura in facturas %}
     <div class="bg-surface rounded-2xl border border-gold/10 overflow-hidden shadow-lg">
-
       <div class="px-6 py-4 bg-bg/40 border-b border-white/5 flex items-center justify-between flex-wrap gap-3">
         <div class="flex items-center gap-4">
           <div>
@@ -300,16 +304,13 @@ tailwind.config = {
       {% else %}
       <div class="px-6 py-4 text-center text-muted text-sm">Sin detalles registrados para esta factura.</div>
       {% endif %}
-
     </div>
     {% else %}
     <div class="bg-surface rounded-2xl border border-gold/10 px-6 py-12 text-center text-muted text-sm">
       No hay facturas registradas en el historial.
     </div>
     {% endfor %}
-
   </div>
-
 </main>
 
 <script>
