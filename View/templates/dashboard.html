@@ -232,14 +232,14 @@
 
       <div class="stat-card bg-surface rounded-2xl p-5 border border-gold/10 animate-countUp">
         <p class="text-[10px] tracking-[2px] uppercase text-muted mb-3 font-semibold">Clientes</p>
-        <p class="font-bebas text-[40px] leading-none text-gold">12</p>
+        <p class="font-bebas text-[40px] leading-none text-gold">{{ total_clientes }}</p>
         <div class="divider mt-3"></div>
         <p class="text-[11px] text-muted mt-2">↑ Total registrados</p>
       </div>
 
       <div class="stat-card bg-surface rounded-2xl p-5 border border-gold/10 animate-countUp">
         <p class="text-[10px] tracking-[2px] uppercase text-muted mb-3 font-semibold">Motos</p>
-        <p class="font-bebas text-[40px] leading-none text-gold">8</p>
+        <p class="font-bebas text-[40px] leading-none text-gold">{{ total_motos }}</p>
         <div class="divider mt-3"></div>
         <p class="text-[11px] text-muted mt-2">↑ En el sistema</p>
       </div>
@@ -275,8 +275,7 @@
           <h3 class="font-bebas text-[18px] tracking-[2px] text-white">ACTIVIDAD RECIENTE</h3>
         </div>
 
-        <div class="space-y-3">
-
+        <div id="contenedor-actividad" class="space-y-3">
           <div class="flex items-center justify-between py-2.5 border-b border-white/5">
             <div class="flex items-center gap-3">
               <span class="w-2 h-2 bg-gold rounded-full flex-shrink-0"></span>
@@ -337,7 +336,7 @@
             </div>
             <div>
               <p class="text-[10px] tracking-[2px] uppercase text-gold font-semibold">Última moto</p>
-              <p class="text-[13px] text-white font-medium mt-0.5">Yamaha FZ 150 — 2023</p>
+              <p id="reg-moto" class="text-[13px] text-white font-medium mt-0.5">Yamaha FZ 150 — 2023</p>
             </div>
           </div>
 
@@ -350,7 +349,7 @@
             </div>
             <div>
               <p class="text-[10px] tracking-[2px] uppercase text-gold font-semibold">Último cliente</p>
-              <p class="text-[13px] text-white font-medium mt-0.5">Carlos Ramírez</p>
+              <p id="reg-cliente" class="text-[13px] text-white font-medium mt-0.5">Carlos Ramírez</p>
             </div>
           </div>
 
@@ -375,3 +374,88 @@
 
 </body>
 </html>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Hacemos la petición a tu API de Flask
+    fetch('/api/dashboard-stats')
+        .then(response => response.json())
+        .then(data => {
+            
+            // ==========================================
+            // LÓGICA PARA: ÚLTIMOS REGISTROS (Derecha)
+            // ==========================================
+            const txtMoto = document.getElementById('reg-moto');
+            const txtCliente = document.getElementById('reg-cliente');
+            const txtProducto = document.getElementById('reg-producto');
+
+            if(txtMoto) txtMoto.innerText = data.ultimos_registros.moto || 'Sin motos registradas';
+            if(txtCliente) txtCliente.innerText = data.ultimos_registros.cliente || 'Sin clientes registrados';
+            if(txtProducto) txtProducto.innerText = data.ultimos_registros.producto || 'Sin productos recientes';
+
+            // ==========================================
+            // LÓGICA PARA: ACTIVIDAD RECIENTE (Izquierda)
+            // ==========================================
+            const contenedorActividad = document.getElementById('contenedor-actividad');
+            
+            if (contenedorActividad && data.actividad_reciente && data.actividad_reciente.length > 0) {
+                // Limpiamos los datos estáticos de prueba
+                contenedorActividad.innerHTML = ''; 
+                
+                // Mantenemos tus opacidades exactas de diseño
+                const opacidadesPuntos = ['bg-gold', 'bg-gold/60', 'bg-gold/40', 'bg-gold/25'];
+
+                data.actividad_reciente.forEach((item, index) => {
+                    const clasePunto = opacidadesPuntos[index] || 'bg-gold/25';
+                    const claseBorde = (index === data.actividad_reciente.length - 1) ? '' : 'border-b border-white/5';
+
+                    // Aquí llamamos a la función auxiliar para calcular el tiempo relativo
+                    const tiempoRelativo = formatearFechaRelativa(item.tiempo);
+
+                    const divItem = document.createElement('div');
+                    divItem.className = `flex items-center justify-between py-2.5 ${claseBorde}`;
+                    divItem.innerHTML = `
+                        <div class="flex items-center gap-3">
+                          <span class="w-2 h-2 ${clasePunto} rounded-full flex-shrink-0"></span>
+                          <span class="text-[13px] text-white font-medium">${item.texto}</span>
+                        </div>
+                        <span class="text-[11px] text-muted whitespace-nowrap">${tiempoRelativo}</span>
+                    `;
+                    contenedorActividad.appendChild(divItem);
+                });
+            }
+        })
+        .catch(error => console.error("Error cargando estadísticas:", error));
+});
+
+// Función auxiliar (está afuera, pero ahora está bien estructurada y no interfiere con 'data')
+function formatearFechaRelativa(fechaString) {
+    if (!fechaString) return "Reciente";
+    
+    // Formateo seguro para navegadores
+    const fechaMovimiento = new Date(fechaString.replace(/-/g, '/')); 
+    const ahora = new Date();
+    
+    const diferenciaSegundos = Math.floor((ahora - fechaMovimiento) / 1000);
+
+    if (diferenciaSegundos < 0) return "Hace un momento"; 
+    if (diferenciaSegundos < 60) return "Hace unos segundos";
+    
+    const diferenciaMinutos = Math.floor(diferenciaSegundos / 60);
+    if (diferenciaMinutos < 60) return `Hace ${diferenciaMinutos} min`;
+    
+    const diferenciaHoras = Math.floor(diferenciaMinutos / 60);
+    if (diferenciaHoras < 24) return diferenciaHoras === 1 ? "Hace 1 hora" : `Hace ${diferenciaHoras} horas`;
+    
+    const diferenciaDias = Math.floor(diferenciaHoras / 24);
+    if (diferenciaDias === 1) return "Ayer";
+    if (diferenciaDias < 7) return `Hace ${diferenciaDias} días`;
+    
+    // MODIFICADO AQUÍ: Ahora incluye el año en formato corto de 4 dígitos (Ej: 05/04/2026)
+    return fechaMovimiento.toLocaleDateString('es-ES', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+    });
+}
+</script>
