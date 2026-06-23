@@ -590,5 +590,26 @@
     formatearFechasTabla();
     filtrar();
   });
+
+  // ═══════════════ SCRIPT DE VALIDACIÓN EN ESPAÑOL ═══════════════
+  document.addEventListener("DOMContentLoaded", function () {
+    const fields = document.querySelectorAll("input[required], select[required], textarea[required]");
+
+    fields.forEach(field => {
+      field.addEventListener("invalid", function (e) {
+        if (field.validity.valueMissing) {
+          field.setCustomValidity("Por favor, rellena este campo.");
+        }
+      });
+
+      field.addEventListener("input", function () {
+        field.setCustomValidity("");
+      });
+      
+      field.addEventListener("change", function () {
+        field.setCustomValidity("");
+      });
+    });
+  });
 </script>
 </html>
