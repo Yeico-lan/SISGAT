@@ -4,10 +4,20 @@ import hashlib
 import os
 import sys
 
+from functools import wraps # Asegúrate de que este import esté arriba
+
+def login_requerido(f):
+    """Decorador para proteger rutas y verificar si hay sesión activa."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'usuario_id' not in session:
+            return redirect(url_for('login_page'))
+        return f(*args, **kwargs)
+    return decorated_function
 # ──────────────────────────────────────────
 #  IMPORTAR DB DESDE MODEL
 # ──────────────────────────────────────────
-sys.path.append(r'C:\Users\Soportepq\Documents\GitHub\SISGAT\Model')
+sys.path.append(r'C:\HP\Soportepq\Documents\GitHub\SISGAT\Model')
 from db import get_connection, Error
 
 # ──────────────────────────────────────────
@@ -411,7 +421,207 @@ def modulo_motos():
         nombre=session.get('usuario_nombre'),
         rol=session.get('usuario_rol')
     )
+# ──────────────────────────────────────────
+#  MÓDULO PRODUCTOS
+# ──────────────────────────────────────────
 
+# 1. ESTA ES LA VISTA (El plato: carga el diseño HTML)
+@app.route('/productos')
+@login_requerido
+def productos():
+    return render_template(
+        'productos.html',
+        nombre=session.get('usuario_nombre'),
+        rol=session.get('usuario_rol')
+    )
+
+
+# 2. ESTA ES LA API (La comida: trae los datos de la base de datos)
+# ── GET /api/productos  →  lista completa con categoría y proveedor ──
+@app.route('/api/productos', methods=['GET'])
+@login_requerido
+def api_get_productos():
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión'}), 500
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT p.prod_id,
+                   p.prod_nombre,
+                   p.prod_descripcion,
+                   p.prod_precio_venta,
+                   p.prod_estado,
+                   p.prod_stock,
+                   p.cat_id,
+                   c.cat_nombre,
+                   p.prov_id,
+                   pr.prov_nombre
+            FROM   productos   p
+            JOIN   categorias  c  ON c.cat_id   = p.cat_id
+            JOIN   proveedores pr ON pr.prov_id  = p.prov_id
+            ORDER  BY p.prod_id
+        """)
+        return jsonify({'ok': True, 'productos': cursor.fetchall()})
+    except Error as e:
+        print(f"[GET PRODUCTOS] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al obtener productos'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ── POST /api/productos  →  crear producto (solo admin) ───────
+@app.route('/api/productos', methods=['POST'])
+@solo_admin
+def api_crear_producto():
+    data        = request.get_json(force=True)
+    nombre      = data.get('nombre', '').strip()
+    descripcion = data.get('descripcion', '').strip()
+    precio      = data.get('precio_venta')
+    stock       = data.get('stock')
+    estado      = data.get('estado', 'Activo').strip()
+    cat_id      = data.get('cat_id')
+    prov_id     = data.get('prov_id')
+
+    if not all([nombre, precio is not None, stock is not None, cat_id, prov_id]):
+        return jsonify({'ok': False, 'mensaje': 'Completa todos los campos obligatorios'}), 400
+
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión'}), 500
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO productos
+                (prod_nombre, prod_descripcion, prod_precio_venta, prod_estado, prod_stock, cat_id, prov_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (nombre, descripcion or None, precio, estado, stock, cat_id, prov_id))
+        conn.commit()
+        return jsonify({'ok': True, 'mensaje': f'Producto "{nombre}" creado correctamente'})
+    except Error as e:
+        print(f"[INSERT PRODUCTO] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al guardar el producto'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ── PUT /api/productos/<id>  →  editar producto (solo admin) ──
+@app.route('/api/productos/<int:prod_id>', methods=['PUT'])
+@solo_admin
+def api_editar_producto(prod_id):
+    data        = request.get_json(force=True)
+    nombre      = data.get('nombre', '').strip()
+    descripcion = data.get('descripcion', '').strip()
+    precio      = data.get('precio_venta')
+    stock       = data.get('stock')
+    estado      = data.get('estado', 'Activo').strip()
+    cat_id      = data.get('cat_id')
+    prov_id     = data.get('prov_id')
+
+    if not all([nombre, precio is not None, stock is not None, cat_id, prov_id]):
+        return jsonify({'ok': False, 'mensaje': 'Completa todos los campos obligatorios'}), 400
+
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión'}), 500
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE productos
+            SET    prod_nombre       = %s,
+                   prod_descripcion  = %s,
+                   prod_precio_venta = %s,
+                   prod_estado       = %s,
+                   prod_stock        = %s,
+                   cat_id            = %s,
+                   prov_id           = %s
+            WHERE  prod_id = %s
+        """, (nombre, descripcion or None, precio, estado, stock, cat_id, prov_id, prod_id))
+        conn.commit()
+        if cursor.rowcount == 0:
+            return jsonify({'ok': False, 'mensaje': 'Producto no encontrado'}), 404
+        return jsonify({'ok': True, 'mensaje': f'Producto "{nombre}" actualizado correctamente'})
+    except Error as e:
+        print(f"[UPDATE PRODUCTO] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al actualizar el producto'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ── DELETE /api/productos/<id>  →  eliminar producto (solo admin) ──
+@app.route('/api/productos/<int:prod_id>', methods=['DELETE'])
+@solo_admin
+def api_eliminar_producto(prod_id):
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión'}), 500
+    try:
+        cursor = conn.cursor(dictionary=True)
+
+        # Verificar que no esté en facturas ni movimientos
+        cursor.execute("SELECT COUNT(*) AS total FROM detalle_facturas WHERE prod_id = %s", (prod_id,))
+        if cursor.fetchone()['total'] > 0:
+            return jsonify({'ok': False, 'mensaje': 'No se puede eliminar: el producto tiene facturas asociadas'}), 409
+
+        cursor.execute("SELECT COUNT(*) AS total FROM detalle_movimientos WHERE prod_id = %s", (prod_id,))
+        if cursor.fetchone()['total'] > 0:
+            return jsonify({'ok': False, 'mensaje': 'No se puede eliminar: el producto tiene movimientos de inventario'}), 409
+
+        cursor.execute("SELECT prod_nombre FROM productos WHERE prod_id = %s", (prod_id,))
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({'ok': False, 'mensaje': 'Producto no encontrado'}), 404
+
+        cursor.execute("DELETE FROM productos WHERE prod_id = %s", (prod_id,))
+        conn.commit()
+        return jsonify({'ok': True, 'mensaje': f'Producto "{row["prod_nombre"]}" eliminado correctamente'})
+    except Error as e:
+        print(f"[DELETE PRODUCTO] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al eliminar el producto'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ── GET /api/categorias  →  para poblar selects ───────────────
+@app.route('/api/categorias', methods=['GET'])
+@login_requerido
+def api_get_categorias():
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión'}), 500
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT cat_id, cat_nombre FROM categorias ORDER BY cat_nombre")
+        return jsonify({'ok': True, 'categorias': cursor.fetchall()})
+    except Error as e:
+        print(f"[GET CATEGORIAS] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al obtener categorías'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ── GET /api/proveedores  →  para poblar selects ──────────────
+@app.route('/api/proveedores', methods=['GET'])
+@login_requerido
+def api_get_proveedores():
+    conn = get_connection()
+    if not conn:
+        return jsonify({'ok': False, 'mensaje': 'Error de conexión'}), 500
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT prov_id, prov_nombre FROM proveedores ORDER BY prov_nombre")
+        return jsonify({'ok': True, 'proveedores': cursor.fetchall()})
+    except Error as e:
+        print(f"[GET PROVEEDORES] {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al obtener proveedores'}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/api/motos', methods=['GET'])
 def obtener_motos():
