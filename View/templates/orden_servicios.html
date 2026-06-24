@@ -1,16 +1,4 @@
 <!DOCTYPE html>
-<!--
-  Plantilla generada para igualar la estética del módulo "Movimientos".
-  Variables que espera esta vista desde Flask:
-    - ordenes: lista de órdenes de servicio, cada una con:
-        ord_id, ord_fecha_ingreso, ord_fecha_entrega, ord_estado,
-        ord_descripcion, ord_total_servicio, ord_total_general,
-        moto_id, cli_id, usu_id
-      (ord_total_servicio / ord_total_general como números, no strings formateados;
-       el formateo "38.000" se hace en JS con toLocaleString)
-    - nombre, rol, session.user_id  (igual que en el resto del panel)
-  Ruta sugerida: /ordenes  ·  POST a /guardar_orden
--->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -154,15 +142,15 @@
     Registrar Usuario
   </a>
 
-  <div class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted/40 cursor-not-allowed select-none">
-    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-      <circle cx="9" cy="7" r="4"/>
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-    </svg>
-    Clientes
-  </div>
+  <a href="/clientes" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+       Clientes
+      </a>
 
   <a href="/motos" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
@@ -315,19 +303,17 @@
 
     <div class="bg-surface rounded-2xl border border-gold/10 shadow-[0_4px_32px_rgba(0,0,0,.35)] overflow-hidden animate-fadeIn" style="animation-delay:.2s">
       <div class="overflow-x-auto">
-        <table class="w-full text-[14px]" style="min-width:1280px;">
+        <table class="w-full text-[14px]" style="min-width:1000px;">
           <thead>
             <tr class="border-b border-white/8">
-              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">ord_id</th>
-              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">ord_fecha_ingreso</th>
-              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">ord_fecha_entrega</th>
-              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">ord_estado</th>
-              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">ord_descripcion</th>
-              <th class="px-5 py-4 text-right text-[10px] tracking-[2px] uppercase text-muted font-semibold">ord_total_servicio</th>
-              <th class="px-5 py-4 text-right text-[10px] tracking-[2px] uppercase text-muted font-semibold">ord_total_general</th>
-              <th class="px-5 py-4 text-center text-[10px] tracking-[2px] uppercase text-muted font-semibold">moto_id</th>
-              <th class="px-5 py-4 text-center text-[10px] tracking-[2px] uppercase text-muted font-semibold">cli_id</th>
-              <th class="px-5 py-4 text-center text-[10px] tracking-[2px] uppercase text-muted font-semibold">usu_id</th>
+              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">ID Orden</th>
+              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Fecha Ingreso</th>
+              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Fecha Entrega</th>
+              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Estado</th>
+              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Descripción</th>
+              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Moto</th>
+              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Cliente</th>
+              <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">Encargado</th>
             </tr>
           </thead>
           <tbody id="tabla-body">
@@ -338,8 +324,7 @@
                 data-fecha="{{ o.ord_fecha_ingreso }}"
                 data-estado="{{ estado_upper }}"
                 data-desc="{{ o.ord_descripcion | lower }}"
-                data-cliente="{{ o.cli_id }}"
-                data-total="{{ o.ord_total_general }}">
+                data-cliente="{{ o.cliente_nombre | lower }}">
 
               <td class="px-5 py-4 font-mono text-[13px] font-bold text-gold">#{{ "%04d" | format(o.ord_id) }}</td>
 
@@ -368,12 +353,9 @@
 
               <td class="px-5 py-4 text-white/90 font-medium">{{ o.ord_descripcion }}</td>
 
-              <td class="px-5 py-4 text-right font-mono text-[13px] text-white/80 row-money" data-raw="{{ o.ord_total_servicio }}">{{ o.ord_total_servicio }}</td>
-              <td class="px-5 py-4 text-right font-mono text-[13px] text-gold font-bold row-money" data-raw="{{ o.ord_total_general }}">{{ o.ord_total_general }}</td>
-
-              <td class="px-5 py-4 text-center font-mono text-[13px] text-gold font-bold">{{ o.moto_id }}</td>
-              <td class="px-5 py-4 text-center font-mono text-[13px] text-gold font-bold">{{ o.cli_id }}</td>
-              <td class="px-5 py-4 text-center font-mono text-[13px] text-gold font-bold">{{ o.usu_id }}</td>
+              <td class="px-5 py-4 text-[13px] font-semibold text-gold">{{ o.mot_placa }}</td>
+              <td class="px-5 py-4 text-[13px] text-white/90 font-medium">{{ o.cliente_nombre }}</td>
+              <td class="px-5 py-4 text-[13px] text-muted">{{ o.usuario_nombre }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -460,25 +442,6 @@
         </div>
 
         <div>
-          <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">ord_total_servicio</label>
-          <div class="field-wrap relative">
-            <input type="number" step="0.01" name="ord_total_servicio" id="f-total-servicio" placeholder="0" class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
-            <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
-          </div>
-        </div>
-        <div>
-          <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">ord_total_general</label>
-          <div class="field-wrap relative">
-            <input type="number" step="0.01" name="ord_total_general" id="f-total-general" placeholder="0" class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
-            <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
-          </div>
-        </div>
-
-        <div>
           <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">MOTO_ID (Moto)</label>
           <div class="field-wrap relative">
             <input type="number" name="moto_id" id="f-moto" placeholder="ID" class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
@@ -500,7 +463,7 @@
         <div class="col-span-2">
           <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">USU_ID (ID Encargado)</label>
           <div class="field-wrap relative">
-            <input type="number" name="usu_id" id="f-usuario" value="{{ session.get('user_id', '') }}" placeholder="ID" class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
+            <input type="number" name="usu_id" id="f-usuario" value="{{ session.get('usuario_id', '') }}" placeholder="ID" class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
             <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
             </svg>
@@ -533,6 +496,146 @@
   </div>
 
 </body>
+
+<script>
+  let tabActual = 'todos';
+  let estadoSel = '';
+
+  function formatearFechasTabla() {
+    document.querySelectorAll('.row-fecha').forEach(el => {
+      const txt = el.textContent.trim();
+      if(txt && txt.includes('-')) {
+        const parts = txt.split('-');
+        if(parts.length === 3) {
+          const f = new Date(parts[0], parts[1] - 1, parts[2]);
+          if(!isNaN(f)) {
+            el.textContent = f.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          }
+        }
+      }
+    });
+  }
+
+  function filtrar() {
+    const q = document.getElementById('search-input').value.trim().toLowerCase();
+    const fd = document.getElementById('filter-date').value;
+    const tbody = document.getElementById('tabla-body');
+    const rows = Array.from(document.querySelectorAll('.data-row'))
+        .sort((a, b) => parseInt(a.getAttribute('data-id')) - parseInt(b.getAttribute('data-id')));
+    rows.forEach(row => tbody.appendChild(row));
+
+    let visibles = 0;
+    let terminadas = 0, proceso = 0, pendientes = 0;
+
+    rows.forEach(row => {
+      const id = row.getAttribute('data-id');
+      const fechaOriginal = row.getAttribute('data-fecha');
+      const estado = row.getAttribute('data-estado');
+      const desc = row.getAttribute('data-desc');
+      const cliente = row.getAttribute('data-cliente');
+
+      if (estado === 'TERMINADA') terminadas++;
+      else if (estado === 'PROCESO') proceso++;
+      else if (estado !== 'CANCELADA') pendientes++;
+
+      let cumpleTab = (tabActual === 'todos' || estado === tabActual);
+      let cumpleFecha = (!fd || fechaOriginal === fd || fechaOriginal.includes(fd));
+      let cumpleQuery = (!q || id.includes(q) || desc.includes(q) || cliente.includes(q));
+
+      if (cumpleTab && cumpleFecha && cumpleQuery) {
+        row.classList.remove('hidden');
+        visibles++;
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('stat-total').textContent = rows.length;
+    document.getElementById('stat-terminadas').textContent = terminadas;
+    document.getElementById('stat-proceso').textContent = proceso;
+    document.getElementById('stat-pendientes').textContent = pendientes;
+
+    document.getElementById('tabla-info').textContent = `${visibles} registro${visibles !== 1 ? 's' : ''}`;
+
+    const empty = document.getElementById('empty-state');
+    if (visibles === 0) empty.classList.remove('hidden');
+    else empty.classList.add('hidden');
+  }
+
+  function setTab(t) {
+    tabActual = t;
+    document.querySelectorAll('.tab-filter').forEach(b => b.classList.remove('tab-active'));
+    document.getElementById('tab-' + t).classList.add('tab-active');
+    filtrar();
+  }
+
+  function limpiarFiltros() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-date').value  = '';
+    setTab('todos');
+  }
+
+  function abrirModal() {
+    estadoSel = '';
+    document.getElementById('f-estado').value = '';
+    const clsOff = 'estado-btn border border-white/10 bg-bg rounded-[10px] py-3 text-[11px] font-bold tracking-[1px] uppercase text-muted cursor-pointer flex flex-col items-center gap-1.5';
+    ['PENDIENTE','PROCESO','TERMINADA','CANCELADA'].forEach(t => { document.getElementById('estado-'+t).className = clsOff; });
+    document.getElementById('f-descripcion').value = '';
+    document.getElementById('f-fecha-ingreso').value = new Date().toISOString().split('T')[0];
+    document.getElementById('f-fecha-entrega').value = '';
+    document.getElementById('f-moto').value = '';
+    document.getElementById('f-cliente').value = '';
+    document.getElementById('modal-error').classList.add('hidden');
+    document.getElementById('modal-overlay').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-overlay').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function selEstado(t) {
+    estadoSel = t;
+    document.getElementById('f-estado').value = t;
+    const base = 'estado-btn rounded-[10px] py-3 text-[11px] font-bold tracking-[1px] uppercase cursor-pointer flex flex-col items-center gap-1.5 border ';
+    const clsMap = {
+      PENDIENTE:  base + 'border-sky-400    bg-sky-400/10    text-sky-400',
+      PROCESO:    base + 'border-orange-400 bg-orange-400/10 text-orange-400',
+      TERMINADA:  base + 'border-green-400  bg-green-400/10  text-green-400',
+      CANCELADA:  base + 'border-red-400    bg-red-400/10    text-red-400',
+    };
+    const clsOff = 'estado-btn border border-white/10 bg-bg rounded-[10px] py-3 text-[11px] font-bold tracking-[1px] uppercase text-muted cursor-pointer flex flex-col items-center gap-1.5';
+    ['PENDIENTE','PROCESO','TERMINADA','CANCELADA'].forEach(k => {
+      document.getElementById('estado-'+k).className = k === t ? clsMap[k] : clsOff;
+    });
+  }
+
+  function validarForm(e) {
+    const descripcion = document.getElementById('f-descripcion').value.trim();
+    const fechaIngreso = document.getElementById('f-fecha-ingreso').value;
+    const moto = document.getElementById('f-moto').value;
+    const cliente = document.getElementById('f-cliente').value;
+    const usuario = document.getElementById('f-usuario').value;
+    const err = document.getElementById('modal-error');
+
+    if (!estadoSel || !descripcion || !fechaIngreso || !moto || !cliente || !usuario) {
+      e.preventDefault();
+      err.classList.remove('hidden');
+      err.style.animation = 'none';
+      void err.offsetWidth;
+      err.style.animation = 'shake .35s ease';
+      return false;
+    }
+    return true;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    formatearFechasTabla();
+    filtrar();
+  });
+</script>
+</html>
 
 <script>
   let tabActual = 'todos';
