@@ -441,34 +441,51 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">MOTO_ID (Moto)</label>
-          <div class="field-wrap relative">
-            <input type="number" name="moto_id" id="f-moto" placeholder="ID" class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
-            <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div>
+         <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">Placa de la Moto</label>
+         <div class="field-wrap relative">
+           <select name="moto_id" id="f-moto" required class="field-input w-full pl-[40px] pr-8 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium appearance-none cursor-pointer focus:border-gold/50 outline-none transition-colors">
+             <option value="" disabled selected hidden>Seleccionar placa...</option>
+             {% for moto in motos %}
+               <option value="{{ moto.mot_id }}" class="bg-bg text-white">{{ moto.mot_placa }} ({ { moto.mot_marca } })</option>
+              {% endfor %}
+           </select>
+           <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm11 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0z M2 9l2-4h9l3 4M7 9l1-4M13 9l2-4M2 9h20"/>
-            </svg>
-          </div>
-        </div>
-        <div>
-          <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">CLI_ID (Cliente)</label>
-          <div class="field-wrap relative">
-            <input type="number" name="cli_id" id="f-cliente" placeholder="ID" class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
-            <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-          </div>
-        </div>
+           </svg>
+         </div>
+      </div>
 
-        <div class="col-span-2">
-          <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">USU_ID (ID Encargado)</label>
-          <div class="field-wrap relative">
-            <input type="number" name="usu_id" id="f-usuario" value="{{ session.get('usuario_id', '') }}" placeholder="ID" class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
-            <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-        </div>
+    <div>
+      <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">Cliente</label>
+      <div class="field-wrap relative">
+        <select name="cli_id" id="f-cliente" required class="field-input w-full pl-[40px] pr-8 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium appearance-none cursor-pointer focus:border-gold/50 outline-none transition-colors">
+         <option value="" disabled selected hidden>Seleccionar cliente...</option>
+         {% for cliente in clientes %}
+          <option value="{{ cliente.cli_id }}" class="bg-bg text-white">{{ cliente.cli_nombre }} {{ cliente.cli_apellido }}</option>
+         {% endfor %}
+        </select>
+        <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="col-span-2">
+      <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">Encargado del Servicio</label>
+      <div class="field-wrap relative">
+        <select name="usu_id" id="f-usuario" required class="field-input w-full pl-[40px] pr-8 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium appearance-none cursor-pointer focus:border-gold/50 outline-none transition-colors">
+        {% for usuario in usuarios %}
+          <option value="{{ usuario.usu_id }}" class="bg-bg text-white" {% if usuario.usu_id == session.get('usuario_id') %}selected{% endif %}>
+            {{ usuario.usu_nombre }} (Tú)
+          </option>
+        {% endfor %}
+        </select>
+        <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+    </div>
       </div>
 
       <div id="modal-error" class="hidden mb-3 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-[10px] text-[13px] text-red-300 text-center font-semibold">
@@ -637,161 +654,3 @@
 </script>
 </html>
 
-<script>
-  let tabActual = 'todos';
-  let estadoSel = '';
-
-  // Formateador nativo para las fechas cargadas por Jinja2
-  function formatearFechasTabla() {
-    document.querySelectorAll('.row-fecha').forEach(el => {
-      const txt = el.textContent.trim();
-      if(txt && txt.includes('-')) {
-        const parts = txt.split('-');
-        if(parts.length === 3) {
-          const f = new Date(parts[0], parts[1] - 1, parts[2]);
-          if(!isNaN(f)) {
-            el.textContent = f.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-          }
-        }
-      }
-    });
-  }
-
-  // Formateador de montos (separador de miles estilo es-CO)
-  function formatearMontosTabla() {
-    document.querySelectorAll('.row-money').forEach(el => {
-      const raw = parseFloat(el.getAttribute('data-raw'));
-      if(!isNaN(raw)) {
-        el.textContent = '$ ' + raw.toLocaleString('es-CO');
-      }
-    });
-  }
-
-  function filtrar() {
-    const q = document.getElementById('search-input').value.trim().toLowerCase();
-    const fd = document.getElementById('filter-date').value;
-    const tbody = document.getElementById('tabla-body');
-    const rows = Array.from(document.querySelectorAll('.data-row'))
-        .sort((a, b) => parseInt(a.getAttribute('data-id')) - parseInt(b.getAttribute('data-id')));
-    rows.forEach(row => tbody.appendChild(row));
-
-    let visibles = 0;
-    let terminadas = 0, proceso = 0, pendientes = 0;
-    let totalFacturado = 0;
-
-    rows.forEach(row => {
-      const id = row.getAttribute('data-id');
-      const fechaOriginal = row.getAttribute('data-fecha');
-      const estado = row.getAttribute('data-estado');
-      const desc = row.getAttribute('data-desc');
-      const cliente = row.getAttribute('data-cliente');
-      const total = parseFloat(row.getAttribute('data-total')) || 0;
-
-      // Contadores globales basados en la DB completa
-      if (estado === 'TERMINADA') terminadas++;
-      else if (estado === 'PROCESO') proceso++;
-      else if (estado !== 'CANCELADA') pendientes++;
-      totalFacturado += total;
-
-      let cumpleTab = (tabActual === 'todos' || estado === tabActual);
-      let cumpleFecha = (!fd || fechaOriginal === fd || fechaOriginal.includes(fd));
-      let cumpleQuery = (!q || id.includes(q) || desc.includes(q) || cliente.includes(q));
-
-      if (cumpleTab && cumpleFecha && cumpleQuery) {
-        row.classList.remove('hidden');
-        visibles++;
-      } else {
-        row.classList.add('hidden');
-      }
-    });
-
-    // Actualizar paneles informativos superiores
-    document.getElementById('stat-total').textContent = rows.length;
-    document.getElementById('stat-terminadas').textContent = terminadas;
-    document.getElementById('stat-proceso').textContent = proceso;
-    document.getElementById('stat-pendientes').textContent = pendientes;
-
-    document.getElementById('tabla-info').textContent = `${visibles} registro${visibles !== 1 ? 's' : ''}`;
-
-    const empty = document.getElementById('empty-state');
-    if (visibles === 0) empty.classList.remove('hidden');
-    else empty.classList.add('hidden');
-  }
-
-  function setTab(t) {
-    tabActual = t;
-    document.querySelectorAll('.tab-filter').forEach(b => b.classList.remove('tab-active'));
-    document.getElementById('tab-' + t).classList.add('tab-active');
-    filtrar();
-  }
-
-  function limpiarFiltros() {
-    document.getElementById('search-input').value = '';
-    document.getElementById('filter-date').value  = '';
-    setTab('todos');
-  }
-
-  function abrirModal() {
-    estadoSel = '';
-    document.getElementById('f-estado').value = '';
-    const clsOff = 'estado-btn border border-white/10 bg-bg rounded-[10px] py-3 text-[11px] font-bold tracking-[1px] uppercase text-muted cursor-pointer flex flex-col items-center gap-1.5';
-    ['PENDIENTE','PROCESO','TERMINADA','CANCELADA'].forEach(t => { document.getElementById('estado-'+t).className = clsOff; });
-    document.getElementById('f-descripcion').value = '';
-    document.getElementById('f-fecha-ingreso').value = new Date().toISOString().split('T')[0];
-    document.getElementById('f-fecha-entrega').value = '';
-    document.getElementById('f-total-servicio').value = '';
-    document.getElementById('f-total-general').value = '';
-    document.getElementById('f-moto').value = '';
-    document.getElementById('f-cliente').value = '';
-    document.getElementById('modal-error').classList.add('hidden');
-    document.getElementById('modal-overlay').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function cerrarModal() {
-    document.getElementById('modal-overlay').classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
-  function selEstado(t) {
-    estadoSel = t;
-    document.getElementById('f-estado').value = t; // Asigna el valor al input hidden para el POST
-    const base = 'estado-btn rounded-[10px] py-3 text-[11px] font-bold tracking-[1px] uppercase cursor-pointer flex flex-col items-center gap-1.5 border ';
-    const clsMap = {
-      PENDIENTE:  base + 'border-sky-400    bg-sky-400/10    text-sky-400',
-      PROCESO:    base + 'border-orange-400 bg-orange-400/10 text-orange-400',
-      TERMINADA:  base + 'border-green-400  bg-green-400/10  text-green-400',
-      CANCELADA:  base + 'border-red-400    bg-red-400/10    text-red-400',
-    };
-    const clsOff = 'estado-btn border border-white/10 bg-bg rounded-[10px] py-3 text-[11px] font-bold tracking-[1px] uppercase text-muted cursor-pointer flex flex-col items-center gap-1.5';
-    ['PENDIENTE','PROCESO','TERMINADA','CANCELADA'].forEach(k => {
-      document.getElementById('estado-'+k).className = k === t ? clsMap[k] : clsOff;
-    });
-  }
-
-  function validarForm(e) {
-    const descripcion = document.getElementById('f-descripcion').value.trim();
-    const fechaIngreso = document.getElementById('f-fecha-ingreso').value;
-    const moto = document.getElementById('f-moto').value;
-    const cliente = document.getElementById('f-cliente').value;
-    const usuario = document.getElementById('f-usuario').value;
-    const err = document.getElementById('modal-error');
-
-    if (!estadoSel || !descripcion || !fechaIngreso || !moto || !cliente || !usuario) {
-      e.preventDefault(); // Detiene el envío si falta algo
-      err.classList.remove('hidden');
-      err.style.animation = 'none';
-      void err.offsetWidth;
-      err.style.animation = 'shake .35s ease';
-      return false;
-    }
-    return true;
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    formatearFechasTabla();
-    formatearMontosTabla();
-    filtrar();
-  });
-</script>
-</html>
