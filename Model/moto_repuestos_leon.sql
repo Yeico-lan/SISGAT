@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `moto_repuestos_leon` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `moto_repuestos_leon`;
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
 -- Host: localhost    Database: moto_repuestos_leon
@@ -55,7 +53,7 @@ CREATE TABLE `clientes` (
   `cli_apellido` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `cli_telefono` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `cli_correo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `cli_direccion` varchar(200) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cli_direccion` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`cli_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -90,7 +88,7 @@ CREATE TABLE `detalle_facturas` (
   KEY `detalle_factura_ibfk_1` (`fac_id`),
   KEY `detalle_factura_ibfk_2` (`prod_id`),
   KEY `fk_usuarios` (`usu_id`),
-  CONSTRAINT `detalle_facturas_ibfk_1` FOREIGN KEY (`fac_id`) REFERENCES `facturas` (`fac_id`),
+  CONSTRAINT `detalle_facturas_ibfk_1` FOREIGN KEY (`fac_id`) REFERENCES `facturacion` (`fac_id`),
   CONSTRAINT `detalle_facturas_ibfk_2` FOREIGN KEY (`prod_id`) REFERENCES `productos` (`prod_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -139,13 +137,13 @@ INSERT INTO `detalle_movimientos` VALUES (1,3,2,25,0,25,1625000.00),(2,4,4,15,0,
 UNLOCK TABLES;
 
 --
--- Table structure for table `facturas`
+-- Table structure for table `facturacion`
 --
 
-DROP TABLE IF EXISTS `facturas`;
+DROP TABLE IF EXISTS `facturacion`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `facturas` (
+CREATE TABLE `facturacion` (
   `fac_id` int NOT NULL AUTO_INCREMENT,
   `fac_fecha_emision` date NOT NULL,
   `fac_total` decimal(10,2) NOT NULL,
@@ -154,19 +152,19 @@ CREATE TABLE `facturas` (
   PRIMARY KEY (`fac_id`),
   KEY `factura_ibfk_1` (`ord_id`),
   KEY `fk_cliente` (`cli_id`),
-  CONSTRAINT `facturas_ibfk_1` FOREIGN KEY (`ord_id`) REFERENCES `orden_servicios` (`ord_id`),
+  CONSTRAINT `facturacion_ibfk_1` FOREIGN KEY (`ord_id`) REFERENCES `orden_servicios` (`ord_id`),
   CONSTRAINT `fk_cliente` FOREIGN KEY (`cli_id`) REFERENCES `clientes` (`cli_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `facturas`
+-- Dumping data for table `facturacion`
 --
 
-LOCK TABLES `facturas` WRITE;
-/*!40000 ALTER TABLE `facturas` DISABLE KEYS */;
-INSERT INTO `facturas` VALUES (1,'2026-03-25',83000.00,2,2),(2,'2026-03-25',63000.00,4,4),(3,'2026-03-25',55000.00,6,7),(4,'2026-03-25',52000.00,8,1),(5,'2026-03-25',240000.00,1,8),(6,'2026-03-25',290000.00,3,3),(7,'2026-03-25',27000.00,5,6),(8,'2026-03-25',180000.00,7,9),(9,'2026-03-25',45000.00,9,5);
-/*!40000 ALTER TABLE `facturas` ENABLE KEYS */;
+LOCK TABLES `facturacion` WRITE;
+/*!40000 ALTER TABLE `facturacion` DISABLE KEYS */;
+INSERT INTO `facturacion` VALUES (1,'2026-03-25',83000.00,2,2),(2,'2026-03-25',63000.00,4,4),(3,'2026-03-25',55000.00,6,7),(4,'2026-03-25',52000.00,8,1),(5,'2026-03-25',240000.00,1,8),(6,'2026-03-25',290000.00,3,3),(7,'2026-03-25',27000.00,5,6),(8,'2026-03-25',180000.00,7,9),(9,'2026-03-25',45000.00,9,5);
+/*!40000 ALTER TABLE `facturacion` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -184,6 +182,7 @@ CREATE TABLE `motos` (
   `mot_cilindraje` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `mot_color` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `cli_id` int NOT NULL,
+  `mot_estado` enum('activo','reparacion','espera') COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`mot_id`),
   UNIQUE KEY `mot_placa_UNIQUE` (`mot_placa`),
   KEY `motos_ibfk_1` (`cli_id`),
@@ -197,7 +196,7 @@ CREATE TABLE `motos` (
 
 LOCK TABLES `motos` WRITE;
 /*!40000 ALTER TABLE `motos` DISABLE KEYS */;
-INSERT INTO `motos` VALUES (1,'ABC12D','Yamaha','MT-03','321','Negro Mate',2),(2,'XYZ98E','Honda','CB 190R','184','Rojo Tricolor',4),(3,'QWE45F','Suzuki','Gixxer','250','Azul GP',6),(4,'RTY78G','Pulsar','NS 200','199','Gris Piedra',1),(5,'UIO12H','KTM','Duke','200','Naranja',7),(6,'DFH56J','Kawasaki','Z400','399','Verde Lime',3),(7,'JKL89K','Hero','Thriller','150','Rojo Sport',5),(8,'ZXC01L','BMW','G310 R','313','Blanco Polar',8),(9,'VBN34M','TVS','Apache','160','Negro/Rojo',9);
+INSERT INTO `motos` VALUES (1,'ABC12D','Yamaha','MT-03','321','Negro Mate',2,'reparacion'),(2,'XYZ98E','Honda','CB 190R','184','Rojo Tricolor',4,'activo'),(3,'QWE45F','Suzuki','Gixxer','250','Azul GP',6,'espera'),(4,'RTY78G','Pulsar','NS 200','199','Gris Piedra',1,'activo'),(5,'UIO12H','KTM','Duke','200','Naranja',7,'activo'),(6,'DFH56J','Kawasaki','Z400','399','Verde Lime',3,'espera'),(7,'JKL89K','Hero','Thriller','150','Rojo Sport',5,'espera'),(8,'ZXC01L','BMW','G310 R','313','Blanco Polar',8,'reparacion'),(9,'VBN34M','TVS','Apache','160','Negro/Rojo',9,'activo');
 /*!40000 ALTER TABLE `motos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -211,9 +210,9 @@ DROP TABLE IF EXISTS `movimientos`;
 CREATE TABLE `movimientos` (
   `mov_id` int NOT NULL AUTO_INCREMENT,
   `mov_tipo` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `mov_motivo` text COLLATE utf8mb4_general_ci,
+  `mov_motivo` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `usu_id` int NOT NULL,
-  `mov_fecha` date NOT NULL,
+  `mov_fecha` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `prod_id` int NOT NULL,
   PRIMARY KEY (`mov_id`),
   KEY `fk_productos` (`prod_id`),
@@ -229,7 +228,7 @@ CREATE TABLE `movimientos` (
 
 LOCK TABLES `movimientos` WRITE;
 /*!40000 ALTER TABLE `movimientos` DISABLE KEYS */;
-INSERT INTO `movimientos` VALUES (1,'salida','Venta directa en mostrador',3,'2029-04-01',1),(2,'Entrada','Compra a proveedor para reabastecimiento',4,'2026-04-01',3),(3,'Entrada','Compra a proveedor para reabastecimiento',5,'2026-04-02',4),(4,'Entrada','Compra a proveedor para reabastecimiento',6,'2026-04-02',5),(5,'salida','Salida para servicio técnico en taller',7,'2026-04-03',6),(6,'Entrada','Devolución de cliente por garantía',8,'2026-04-03',7),(7,'Entrada','Ajuste de inventario (sobrante)',1,'2026-04-04',8),(8,'salida','Venta directa en mostrador',9,'2026-04-04',9),(9,'Entrada','Compra a proveedor para reabastecimiento',2,'2026-04-05',1);
+INSERT INTO `movimientos` VALUES (1,'salida','Venta directa en mostrador',3,'2026-04-01 05:00:00',1),(2,'Entrada','Compra a proveedor para reabastecimiento',4,'2026-04-01 05:00:00',3),(3,'Entrada','Compra a proveedor para reabastecimiento',5,'2026-04-02 05:00:00',4),(4,'Entrada','Compra a proveedor para reabastecimiento',6,'2026-04-02 05:00:00',5),(5,'salida','Salida para servicio técnico en taller',7,'2026-04-03 05:00:00',6),(6,'Entrada','Devolución de cliente por garantía',8,'2026-04-03 05:00:00',7),(7,'Entrada','Ajuste de inventario (sobrante)',1,'2026-04-04 05:00:00',8),(8,'salida','Venta directa en mostrador',9,'2026-04-04 05:00:00',9),(9,'Entrada','Compra a proveedor para reabastecimiento',2,'2026-04-05 05:00:00',1);
 /*!40000 ALTER TABLE `movimientos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -317,7 +316,7 @@ CREATE TABLE `proveedores` (
   `prov_correo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `prov_direccion` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`prov_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -339,8 +338,8 @@ DROP TABLE IF EXISTS `roles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `roles` (
   `rol_id` int NOT NULL AUTO_INCREMENT,
-  `rol_nombre` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `rol_descripcion` text COLLATE utf8mb4_general_ci,
+  `rol_nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `rol_descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`rol_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -368,11 +367,12 @@ CREATE TABLE `usuarios` (
   `usu_apellido` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `usu_correo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `usu_telefono` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `usu_contrasena` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `id_rol` int NOT NULL,
   PRIMARY KEY (`usu_id`),
   KEY `usuarios_ibfk_1` (`id_rol`),
   CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`rol_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -381,7 +381,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'Felix','Manrique','felix@taller.com','3204409605',2),(2,'Carlos','Mendoza','carlos.m@taller.com','3124185674',1),(3,'Andres','Ruíz','andres.r@taller.com','3102223344',2),(4,'Sergio','Plazas','sergio.p@taller.com','3115556677',1),(5,'Laura','Ospina','laura.o@taller.com','3008889900',1),(6,'David','Castro','david.c@taller.com','3141112233',2),(7,'Miller','Ossa','miller.o@taller.com','3183334455',2),(8,'Diana','Gomez','diana.g@taller.com','3176667788',1),(9,'Kevin','Leon','kevin.l@taller.com','3159990011',1);
+INSERT INTO `usuarios` VALUES (1,'Felix','Manrique','felix@taller.com','3204409605','ddf97b6e17d63d2bfcce62cb6aba9a2e185e07d67c821cafa2ce3e5aa794c509',2),(2,'Carlos','Mendoza','carlos.m@taller.com','3124185674','ac9689e2272427085e35b9d3e3e8bed88cb3434828b43b86fc0596cad4c6e270',1),(3,'Andres','Ruíz','andres.r@taller.com','3102223344','ddf97b6e17d63d2bfcce62cb6aba9a2e185e07d67c821cafa2ce3e5aa794c509',2),(4,'Sergio','Plazas','sergio.p@taller.com','3115556677','ac9689e2272427085e35b9d3e3e8bed88cb3434828b43b86fc0596cad4c6e270',1),(5,'Laura','Ospina','laura.o@taller.com','3008889900','ac9689e2272427085e35b9d3e3e8bed88cb3434828b43b86fc0596cad4c6e270',1),(6,'David','Castro','david.c@taller.com','3141112233','ddf97b6e17d63d2bfcce62cb6aba9a2e185e07d67c821cafa2ce3e5aa794c509',2),(7,'Miller','Ossa','miller.o@taller.com','3183334455','ddf97b6e17d63d2bfcce62cb6aba9a2e185e07d67c821cafa2ce3e5aa794c509',2),(8,'Diana','Gomez','diana.g@taller.com','3176667788','ac9689e2272427085e35b9d3e3e8bed88cb3434828b43b86fc0596cad4c6e270',1),(9,'Kevin','Leon','kevin.l@taller.com','3159990011','ac9689e2272427085e35b9d3e3e8bed88cb3434828b43b86fc0596cad4c6e270',1);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -394,4 +394,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-09 18:23:22
+-- Dump completed on 2026-06-23 18:40:37
