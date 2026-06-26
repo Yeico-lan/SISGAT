@@ -350,8 +350,8 @@
         <table class="w-full">
           <thead>
             <tr class="border-b border-white/5">
-              <th class="text-left px-6 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">Cliente / Nombre</th>
-              <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">ID</th>
+              <th class="text-left px-6 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">ID</th>
+              <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">NOMBRE</th>
               <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">Teléfono</th>
               <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">Correo</th>
               <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">Dirección</th>
@@ -563,12 +563,12 @@ function render() {
     tbody.innerHTML += `
       <tr class="table-row border-b border-white/[0.04]">
 
-        <td class="px-6 py-3">
-          ${c.nombre} ${c.apellido}
-        </td>
-
         <td class="px-4 py-3">
           ${c.id}
+        </td>
+
+        <td class="px-6 py-3">
+          ${c.nombre} ${c.apellido}
         </td>
 
         <td class="px-4 py-3">
@@ -589,7 +589,7 @@ function render() {
 
         <td class="px-4 py-3">
           <button onclick="deleteClient(${c.id})">
-            Eliminar
+             Eliminar
           </button>
         </td>
 
