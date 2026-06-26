@@ -72,6 +72,8 @@
   ::-webkit-scrollbar-thumb { background: rgba(255,211,105,.15); border-radius: 2px; }
 
   .stat-card:nth-child(1) { animation-delay: .05s; }
+  .stat-card:nth-child(2) { animation-delay: .10s; }
+  .stat-card:nth-child(3) { animation-delay: .15s; }
 
   /* Tabla */
   .table-row { transition: background .15s; }
@@ -183,7 +185,7 @@
         Registrar Usuario
       </a>
 
-      <a href="/clientes" class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide text-muted cursor-pointer">
+      <a href="/clientes" class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[14px] font-semibold tracking-wide cursor-pointer">
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
           <circle cx="9" cy="7" r="4"/>
@@ -290,6 +292,20 @@
         <div class="divider mt-3"></div>
         <p class="text-[11px] text-muted mt-2">↑ Total registrados</p>
       </div>
+
+      <div class="stat-card bg-surface rounded-2xl p-5 border border-gold/10 animate-countUp">
+        <p class="text-[10px] tracking-[2px] uppercase text-muted mb-3 font-semibold">Con Correo Registrado</p>
+        <p class="font-bebas text-[40px] leading-none text-gold" id="stat-correo">{{ clientes|selectattr('cli_correo')|list|length }}</p>
+        <div class="divider mt-3"></div>
+        <p class="text-[11px] text-muted mt-2">✉ Contacto disponible</p>
+      </div>
+
+      <div class="stat-card bg-surface rounded-2xl p-5 border border-gold/10 animate-countUp">
+        <p class="text-[10px] tracking-[2px] uppercase text-muted mb-3 font-semibold">Con Dirección Registrada</p>
+        <p class="font-bebas text-[40px] leading-none text-gold" id="stat-direccion">{{ clientes|selectattr('cli_direccion')|list|length }}</p>
+        <div class="divider mt-3"></div>
+        <p class="text-[11px] text-muted mt-2">📍 Ubicación disponible</p>
+      </div>
     </div>
 
     <!-- TOOLBAR + TABLA -->
@@ -334,8 +350,8 @@
         <table class="w-full">
           <thead>
             <tr class="border-b border-white/5">
-              <th class="text-left px-6 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">ID</th>
-              <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">Cliente / Nombre</th>
+              <th class="text-left px-6 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">Cliente / Nombre</th>
+              <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">ID</th>
               <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">Teléfono</th>
               <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">Correo</th>
               <th class="text-left px-4 py-3 text-[10px] tracking-[2px] uppercase text-muted font-semibold">Dirección</th>
@@ -345,8 +361,8 @@
           <tbody id="clients-tbody">
             {% for cliente in clientes %}
             <tr class="table-row border-b border-white/5 text-[13px] font-medium">
-              <td class="px-6 py-3.5 font-semibold text-gold">{{ cliente.cli_id }}</td>
-              <td class="px-4 py-3.5 text-white">{{ cliente.cli_nombre }} {{ cliente.cli_apellido }}</td>
+              <td class="px-6 py-3.5 text-white">{{ cliente.cli_id }}</td>
+              <td class="px-4 py-3.5 font-semibold text-gold">{{ cliente.cli_nombre }} {{ cliente.cli_apellido }}</td>
               <td class="px-4 py-3.5 text-muted">{{ cliente.cli_telefono }}</td>
               <td class="px-4 py-3.5 text-muted">{{ cliente.cli_correo or 'N/A' }}</td>
               <td class="px-4 py-3.5 text-muted">{{ cliente.cli_direccion or 'N/A' }}</td>
@@ -354,7 +370,7 @@
                 <button onclick="openDetail('{{ cliente.cli_id }}', '{{ cliente.cli_nombre }} {{ cliente.cli_apellido }}', '{{ cliente.cli_telefono }}', '{{ cliente.cli_correo or '' }}', '{{ cliente.cli_direccion or '' }}')" class="action-btn" title="Ver detalle">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                 </button>
-                <a href="/clientes/eliminar/{{ cliente.cli_id }}" onclick="return confirm('¿Seguro que deseas eliminar este cliente?')" class="action-btn danger" title="Eliminar">
+                <a href="/clientes/eliminar/{{ cliente.cli_id }}" onclick="return confirm('¿Seguro que deseas eliminar este cliente?')" class="action-btn danger inline-flex" title="Eliminar">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </a>
               </td>
@@ -397,7 +413,7 @@
             <input name="cli_telefono" type="text" required placeholder="310 234 5678" class="modal-input" />
           </div>
           <div class="col-span-2">
-            <label class="block text-[10px] tracking-[2px] uppercase text-muted font-semibold mb-1.5">Correo electrónico</label>
+            <label class="block text-[10px] tracking-[2px] uppercase text-muted font-semibold mb-1.5">Correo electrónico <span class="text-muted/50">(opcional)</span></label>
             <input name="cli_correo" type="email" placeholder="correo@ejemplo.com" class="modal-input" />
           </div>
           <div class="col-span-2">
