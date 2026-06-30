@@ -3,8 +3,7 @@ from functools import wraps
 import hashlib
 import os
 import sys
-
-from functools import wraps # Asegúrate de que este import esté arriba
+from functools import wraps 
 
 def login_requerido(f):
     """Decorador para proteger rutas y verificar si hay sesión activa."""
@@ -17,7 +16,7 @@ def login_requerido(f):
 # ──────────────────────────────────────────
 #  IMPORTAR DB DESDE MODEL
 # ──────────────────────────────────────────
-sys.path.append(r'C:\HP\Soportepq\Documents\GitHub\SISGAT\Model')
+sys.path.append(r'C:\Users\javie\Onedrive\Documentos\GitHub\SISGAT\Model')
 from db import get_connection, Error
 
 # ──────────────────────────────────────────
@@ -117,12 +116,60 @@ def dashboard():
         return redirect(url_for('login_page'))
 
     conn = get_connection()
+    total_clientes = 0
+    total_motos = 0
+    total_productos = 0
     total_proveedores = 0
+    ultima_moto = None
+    ultimo_cliente = None
+    ultimo_producto = None
+
     if conn:
         try:
             cursor = conn.cursor(dictionary=True)
+
+            # ── Contadores ──
+            cursor.execute("SELECT COUNT(*) as total FROM clientes")
+            total_clientes = cursor.fetchone()['total']
+
+            cursor.execute("SELECT COUNT(*) as total FROM motos")
+            total_motos = cursor.fetchone()['total']
+
+            cursor.execute("SELECT COUNT(*) as total FROM productos")
+            total_productos = cursor.fetchone()['total']
+
             cursor.execute("SELECT COUNT(*) as total FROM proveedores")
             total_proveedores = cursor.fetchone()['total']
+
+            # ── Última moto registrada ──
+            cursor.execute("""
+                SELECT mot_marca, mot_modelo
+                FROM motos
+                ORDER BY mot_id DESC
+                LIMIT 1
+            """)
+            ultima_moto = cursor.fetchone()
+
+            # ── Último cliente registrado ──
+            cursor.execute("""
+                SELECT cli_nombre, cli_apellido
+                FROM clientes
+                ORDER BY cli_id DESC
+                LIMIT 1
+            """)
+            ultimo_cliente = cursor.fetchone()
+
+            # ── Último producto registrado ──
+            cursor.execute("""
+                SELECT prod_nombre
+                FROM productos
+                ORDER BY prod_id DESC
+                LIMIT 1
+            """)
+            ultimo_producto = cursor.fetchone()
+
+        except Error as e:
+            print(f"[SELECT ERROR DASHBOARD] {e}")
         finally:
             cursor.close()
             conn.close()
@@ -130,8 +177,77 @@ def dashboard():
     return render_template('dashboard.html',
                            nombre=session.get('usuario_nombre'),
                            rol=session.get('usuario_rol'),
-                           total_proveedores=total_proveedores)
+                           total_clientes=total_clientes,
+                           total_motos=total_motos,
+                           total_productos=total_productos,
+                           total_proveedores=total_proveedores,
+                           ultima_moto=ultima_moto,
+                           ultimo_cliente=ultimo_cliente,
+                           ultimo_producto=ultimo_producto)
 
+
+@app.route('/api/actividad-reciente')
+def api_actividad_reciente():
+    """Combina los últimos registros de varias tablas y los ordena por fecha."""
+    if not session.get('usuario_id'):
+        return jsonify([])
+
+    conn = get_connection()
+    eventos = []
+
+    if conn:
+        try:
+            cursor = conn.cursor(dictionary=True)
+
+            # Motos recientes (usa mot_id como proxy de orden ya que no hay fecha)
+            cursor.execute("SELECT mot_id, mot_marca, mot_modelo FROM motos ORDER BY mot_id DESC LIMIT 3")
+            for m in cursor.fetchall():
+                eventos.append({
+                    'tipo': 'moto',
+                    'texto': f"Nueva moto registrada: {m['mot_marca']} {m['mot_modelo']}",
+                    'orden': m['mot_id']
+                })
+
+            # Clientes recientes
+            cursor.execute("SELECT cli_id, cli_nombre, cli_apellido FROM clientes ORDER BY cli_id DESC LIMIT 3")
+            for c in cursor.fetchall():
+                eventos.append({
+                    'tipo': 'cliente',
+                    'texto': f"Nuevo cliente agregado: {c['cli_nombre']} {c['cli_apellido']}",
+                    'orden': c['cli_id']
+                })
+
+            # Proveedores recientes
+            cursor.execute("SELECT prov_id, prov_nombre FROM proveedores ORDER BY prov_id DESC LIMIT 3")
+            for p in cursor.fetchall():
+                eventos.append({
+                    'tipo': 'proveedor',
+                    'texto': f"Nuevo proveedor añadido: {p['prov_nombre']}",
+                    'orden': p['prov_id']
+                })
+
+            # Movimientos recientes (sí tiene fecha real)
+            cursor.execute("""
+                SELECT mov_id, mov_tipo, mov_motivo, mov_fecha
+                FROM movimientos
+                ORDER BY mov_id DESC LIMIT 3
+            """)
+            for mv in cursor.fetchall():
+                eventos.append({
+                    'tipo': 'movimiento',
+                    'texto': f"Movimiento {mv['mov_tipo'].lower()}: {mv['mov_motivo']}",
+                    'orden': mv['mov_id']
+                })
+
+        except Error as e:
+            print(f"[SELECT ERROR ACTIVIDAD] {e}")
+        finally:
+            cursor.close()
+            conn.close()
+
+    # Ordena todo por 'orden' descendente (más reciente primero) y limita a 6
+    eventos.sort(key=lambda x: x['orden'], reverse=True)
+    return jsonify(eventos[:6])
 
 # ──────────────────────────────────────────
 #  REGISTRAR USUARIO (solo admin)
@@ -421,6 +537,131 @@ def modulo_motos():
         nombre=session.get('usuario_nombre'),
         rol=session.get('usuario_rol')
     )
+
+@app.route('/api/motos', methods=['GET'])
+def obtener_motos():
+    if not session.get('usuario_id'):
+        return jsonify([])
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT mot_id, mot_placa, mot_marca, mot_modelo,
+                   mot_cilindraje, mot_color, mot_estado, cli_id
+            FROM motos
+            ORDER BY mot_id ASC
+        """)
+
+        return jsonify(cursor.fetchall())
+
+    except Exception as e:
+        print(f"Error en obtener_motos: {e}")
+        return jsonify([])
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+@app.route('/api/motos', methods=['POST'])
+def crear_moto():
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False}), 401
+
+    data = request.get_json(force=True)
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO motos
+            (mot_placa, mot_marca, mot_modelo, mot_cilindraje, mot_color, mot_estado, cli_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (
+            data['placa'], data['marca'], data['modelo'],
+            data['cilindraje'], data['color'], data['estado'], data['cli_id']
+        ))
+
+        conn.commit()
+        return jsonify({'ok': True, 'mensaje': 'Moto creada con éxito'})
+
+    except Exception as e:
+        print(f"Error en crear_moto: {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al crear moto'})
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+@app.route('/api/motos/<int:id>', methods=['PUT'])
+def actualizar_moto(id):
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False}), 401
+
+    data = request.get_json(force=True)
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE motos
+            SET mot_placa=%s, mot_marca=%s, mot_modelo=%s,
+                mot_cilindraje=%s, mot_color=%s, mot_estado=%s, cli_id=%s
+            WHERE mot_id=%s
+        """, (
+            data['placa'], data['marca'], data['modelo'],
+            data['cilindraje'], data['color'], data['estado'],
+            data['cli_id'], id
+        ))
+
+        conn.commit()
+        return jsonify({'ok': True, 'mensaje': 'Moto actualizada con éxito'})
+
+    except Exception as e:
+        print(f"Error en actualizar_moto: {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al actualizar'})
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+@app.route('/api/motos/<int:id>', methods=['DELETE'])
+def eliminar_moto(id):
+    if not session.get('usuario_id'):
+        return jsonify({'ok': False}), 401
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM motos WHERE mot_id = %s", (id,))
+        conn.commit()
+        return jsonify({'ok': True, 'mensaje': 'Moto eliminada con éxito'})
+
+    except Exception as e:
+        print(f"Error en eliminar_moto: {e}")
+        return jsonify({'ok': False, 'mensaje': 'Error al eliminar'})
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
 # ──────────────────────────────────────────
 #  MÓDULO PRODUCTOS
 # ──────────────────────────────────────────
@@ -623,129 +864,6 @@ def api_get_proveedores():
         cursor.close()
         conn.close()
 
-@app.route('/api/motos', methods=['GET'])
-def obtener_motos():
-    if not session.get('usuario_id'):
-        return jsonify([])
-
-    conn = None
-    cursor = None
-
-    try:
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        cursor.execute("""
-            SELECT mot_id, mot_placa, mot_marca, mot_modelo,
-                   mot_cilindraje, mot_color, mot_estado, cli_id
-            FROM motos
-            ORDER BY mot_id ASC
-        """)
-
-        return jsonify(cursor.fetchall())
-
-    except Exception as e:
-        print(f"Error en obtener_motos: {e}")
-        return jsonify([])
-
-    finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
-
-
-@app.route('/api/motos', methods=['POST'])
-def crear_moto():
-    if not session.get('usuario_id'):
-        return jsonify({'ok': False}), 401
-
-    data = request.get_json(force=True)
-    conn = None
-    cursor = None
-
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            INSERT INTO motos
-            (mot_placa, mot_marca, mot_modelo, mot_cilindraje, mot_color, mot_estado, cli_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (
-            data['placa'], data['marca'], data['modelo'],
-            data['cilindraje'], data['color'], data['estado'], data['cli_id']
-        ))
-
-        conn.commit()
-        return jsonify({'ok': True, 'mensaje': 'Moto creada con éxito'})
-
-    except Exception as e:
-        print(f"Error en crear_moto: {e}")
-        return jsonify({'ok': False, 'mensaje': 'Error al crear moto'})
-
-    finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
-
-
-@app.route('/api/motos/<int:id>', methods=['PUT'])
-def actualizar_moto(id):
-    if not session.get('usuario_id'):
-        return jsonify({'ok': False}), 401
-
-    data = request.get_json(force=True)
-    conn = None
-    cursor = None
-
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            UPDATE motos
-            SET mot_placa=%s, mot_marca=%s, mot_modelo=%s,
-                mot_cilindraje=%s, mot_color=%s, mot_estado=%s, cli_id=%s
-            WHERE mot_id=%s
-        """, (
-            data['placa'], data['marca'], data['modelo'],
-            data['cilindraje'], data['color'], data['estado'],
-            data['cli_id'], id
-        ))
-
-        conn.commit()
-        return jsonify({'ok': True, 'mensaje': 'Moto actualizada con éxito'})
-
-    except Exception as e:
-        print(f"Error en actualizar_moto: {e}")
-        return jsonify({'ok': False, 'mensaje': 'Error al actualizar'})
-
-    finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
-
-
-@app.route('/api/motos/<int:id>', methods=['DELETE'])
-def eliminar_moto(id):
-    if not session.get('usuario_id'):
-        return jsonify({'ok': False}), 401
-
-    conn = None
-    cursor = None
-
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM motos WHERE mot_id = %s", (id,))
-        conn.commit()
-        return jsonify({'ok': True, 'mensaje': 'Moto eliminada con éxito'})
-
-    except Exception as e:
-        print(f"Error en eliminar_moto: {e}")
-        return jsonify({'ok': False, 'mensaje': 'Error al eliminar'})
-
-    finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
-
 # ──────────────────────────────────────────
 #  FACTURACIÓN
 # ──────────────────────────────────────────
@@ -865,7 +983,7 @@ def clientes_page():
                 SELECT cli_id, cli_nombre, cli_apellido, cli_telefono,
                        cli_correo, cli_direccion
                 FROM clientes
-                ORDER BY cli_nombre
+                ORDER BY cli_id ASC 
             """)
             clientes = cursor.fetchall()
         except Error as e:
@@ -983,6 +1101,89 @@ def api_eliminar_cliente(id):
     finally:
         cursor.close()
         conn.close()
+
+
+@app.route('/ordenes')
+def modulo_ordenes():
+    if not session.get('usuario_id'):
+        return redirect(url_for('login_page'))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            o.ord_id,
+            o.ord_fecha_ingreso,
+            o.ord_fecha_entrega,
+            o.ord_estado,
+            o.ord_descripcion,
+            m.mot_placa,
+            CONCAT(c.cli_nombre, ' ', c.cli_apellido) AS cliente_nombre,
+            CONCAT(u.usu_nombre, ' ', u.usu_apellido) AS usuario_nombre
+        FROM orden_servicios o
+        LEFT JOIN motos m    ON m.mot_id = o.mot_id
+        LEFT JOIN clientes c ON c.cli_id = o.cli_id
+        LEFT JOIN usuarios u ON u.usu_id = o.usu_id
+        ORDER BY o.ord_id DESC
+    """)
+
+    ordenes = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        'orden_servicios.html',
+        ordenes=ordenes,
+        nombre=session.get('usuario_nombre'),
+        rol=session.get('usuario_rol')
+    )
+
+
+@app.route('/guardar_orden', methods=['POST'])
+def guardar_orden():
+    if not session.get('usuario_id'):
+        return redirect(url_for('login_page'))
+
+    ord_estado = request.form['ord_estado']
+    ord_descripcion = request.form['ord_descripcion']
+    ord_fecha_ingreso = request.form['ord_fecha_ingreso']
+    ord_fecha_entrega = request.form['ord_fecha_entrega'] or None
+    mot_id = request.form['moto_id']
+    cli_id = request.form['cli_id']
+    usu_id = request.form['usu_id']
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO orden_servicios (
+            ord_fecha_ingreso,
+            ord_fecha_entrega,
+            ord_estado,
+            ord_descripcion,
+            mot_id,
+            cli_id,
+            usu_id
+        )
+        VALUES (%s,%s,%s,%s,%s,%s,%s)
+    """, (
+        ord_fecha_ingreso,
+        ord_fecha_entrega,
+        ord_estado,
+        ord_descripcion,
+        mot_id,
+        cli_id,
+        usu_id
+    ))
+
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for('modulo_ordenes'))
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
