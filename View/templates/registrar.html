@@ -53,7 +53,6 @@
 
 <body class="min-h-screen bg-bg text-white">
 
-  <!-- NAVBAR -->
   <nav class="relative z-10 flex items-center justify-between px-8 py-4
               border-b border-gold/10 bg-surface/60 backdrop-blur-sm">
     <a href="/dashboard" class="font-bebas text-[22px] tracking-[3px] text-gold hover:opacity-80 transition-opacity">
@@ -65,14 +64,12 @@
     </span>
   </nav>
 
-  <!-- FORMULARIO -->
   <div class="relative z-10 flex justify-center px-4 py-12">
     <div class="w-full max-w-[480px] bg-surface rounded-[18px] px-10 pt-10 pb-10
                 border border-gold/15
                 shadow-[0_32px_80px_rgba(0,0,0,.5),0_0_60px_rgba(255,211,105,.05)]
                 animate-slideUp">
 
-      <!-- Encabezado -->
       <div class="text-center mb-8">
         <div class="w-[60px] h-[60px] bg-gold rounded-[14px] flex items-center justify-center mx-auto mb-4
                     shadow-[0_8px_24px_rgba(255,211,105,.3)]">
@@ -90,7 +87,6 @@
 
       <div class="divider mb-7"></div>
 
-      <!-- Fila: Nombre + Apellido -->
       <div class="grid grid-cols-2 gap-4 mb-5">
         <div>
           <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
@@ -98,6 +94,7 @@
           </label>
           <div class="input-wrap relative">
             <input type="text" id="nombre" placeholder="Carlos" autocomplete="off"
+                   oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g, '')"
                    class="input-field w-full py-[11px] pl-[38px] pr-3
                           bg-bg border border-gold/15 rounded-[10px]
                           text-white text-[14px] font-medium transition-all duration-200"/>
@@ -114,6 +111,7 @@
           </label>
           <div class="input-wrap relative">
             <input type="text" id="apellido" placeholder="Mendoza" autocomplete="off"
+                   oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g, '')"
                    class="input-field w-full py-[11px] pl-[38px] pr-3
                           bg-bg border border-gold/15 rounded-[10px]
                           text-white text-[14px] font-medium transition-all duration-200"/>
@@ -126,7 +124,6 @@
         </div>
       </div>
 
-      <!-- Correo -->
       <div class="mb-5">
         <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
           Correo electrónico <span class="text-gold">*</span>
@@ -145,7 +142,6 @@
         </div>
       </div>
 
-      <!-- Fila: Teléfono + Rol -->
       <div class="grid grid-cols-2 gap-4 mb-5">
         <div>
           <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
@@ -180,7 +176,6 @@
         </div>
       </div>
 
-      <!-- Contraseña -->
       <div class="mb-7">
         <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
           Contraseña <span class="text-gold">*</span>
@@ -210,7 +205,6 @@
         </div>
       </div>
 
-      <!-- BOTÓN -->
       <button id="btnRegistrar"
               class="btn-submit relative w-full py-[14px] bg-gold text-bg
                      font-bebas text-[18px] tracking-[3px] rounded-[10px]
@@ -221,7 +215,6 @@
         CREAR USUARIO
       </button>
 
-      <!-- Mensajes -->
       <div id="errorMsg"
            class="hidden mt-4 px-4 py-3 bg-red-500/10 border border-red-500/30
                   rounded-lg text-[13px] text-red-300 text-center"></div>
@@ -270,6 +263,12 @@
 
     if (!payload.nombre || !payload.apellido || !payload.correo || !payload.id_rol || !payload.contrasena) {
       mostrarError('Completa todos los campos obligatorios (*)');
+      return;
+    }
+
+    // Validación del carácter '@' en el correo
+    if (!payload.correo.includes('@')) {
+      mostrarError('El correo electrónico debe contener un carácter "@"');
       return;
     }
 
