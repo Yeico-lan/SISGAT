@@ -186,47 +186,79 @@ def dashboard():
                            ultimo_producto=ultimo_producto)
 
 
-@app.route('/api/actividad-reciente')
-def api_actividad_reciente():
-    """Combina los últimos registros de varias tablas y los ordena por fecha."""
+@app.route('/api/dashboard-stats')
+def api_dashboard_stats():
     if not session.get('usuario_id'):
-        return jsonify([])
+        return jsonify({'ok': False, 'mensaje': 'No autorizado'}), 401
 
     conn = get_connection()
-    eventos = []
+    ultimos_registros = {'moto': None, 'cliente': None, 'producto': None}
+    actividad_reciente = []
 
     if conn:
         try:
             cursor = conn.cursor(dictionary=True)
 
-            # Motos recientes (usa mot_id como proxy de orden ya que no hay fecha)
+            # ── Última moto ──
+            cursor.execute("""
+                SELECT mot_marca, mot_modelo
+                FROM motos
+                ORDER BY mot_id DESC
+                LIMIT 1
+            """)
+            moto = cursor.fetchone()
+            if moto:
+                ultimos_registros['moto'] = f"{moto['mot_marca']} {moto['mot_modelo']}"
+
+            # ── Último cliente ──
+            cursor.execute("""
+                SELECT cli_nombre, cli_apellido
+                FROM clientes
+                ORDER BY cli_id DESC
+                LIMIT 1
+            """)
+            cliente = cursor.fetchone()
+            if cliente:
+                ultimos_registros['cliente'] = f"{cliente['cli_nombre']} {cliente['cli_apellido']}"
+
+            # ── Último producto ──
+            cursor.execute("""
+                SELECT prod_nombre
+                FROM productos
+                ORDER BY prod_id DESC
+                LIMIT 1
+            """)
+            producto = cursor.fetchone()
+            if producto:
+                ultimos_registros['producto'] = producto['prod_nombre']
+
+            # ── Actividad reciente combinada ──
+            eventos = []
+
             cursor.execute("SELECT mot_id, mot_marca, mot_modelo FROM motos ORDER BY mot_id DESC LIMIT 3")
             for m in cursor.fetchall():
                 eventos.append({
-                    'tipo': 'moto',
                     'texto': f"Nueva moto registrada: {m['mot_marca']} {m['mot_modelo']}",
-                    'orden': m['mot_id']
+                    'orden': m['mot_id'],
+                    'tiempo': None
                 })
 
-            # Clientes recientes
             cursor.execute("SELECT cli_id, cli_nombre, cli_apellido FROM clientes ORDER BY cli_id DESC LIMIT 3")
             for c in cursor.fetchall():
                 eventos.append({
-                    'tipo': 'cliente',
                     'texto': f"Nuevo cliente agregado: {c['cli_nombre']} {c['cli_apellido']}",
-                    'orden': c['cli_id']
+                    'orden': c['cli_id'],
+                    'tiempo': None
                 })
 
-            # Proveedores recientes
             cursor.execute("SELECT prov_id, prov_nombre FROM proveedores ORDER BY prov_id DESC LIMIT 3")
             for p in cursor.fetchall():
                 eventos.append({
-                    'tipo': 'proveedor',
                     'texto': f"Nuevo proveedor añadido: {p['prov_nombre']}",
-                    'orden': p['prov_id']
+                    'orden': p['prov_id'],
+                    'tiempo': None
                 })
 
-            # Movimientos recientes (sí tiene fecha real)
             cursor.execute("""
                 SELECT mov_id, mov_tipo, mov_motivo, mov_fecha
                 FROM movimientos
@@ -234,21 +266,24 @@ def api_actividad_reciente():
             """)
             for mv in cursor.fetchall():
                 eventos.append({
-                    'tipo': 'movimiento',
                     'texto': f"Movimiento {mv['mov_tipo'].lower()}: {mv['mov_motivo']}",
-                    'orden': mv['mov_id']
+                    'orden': mv['mov_id'],
+                    'tiempo': mv['mov_fecha'].strftime('%Y-%m-%d') if mv['mov_fecha'] else None
                 })
 
+            eventos.sort(key=lambda x: x['orden'], reverse=True)
+            actividad_reciente = eventos[:4]
+
         except Error as e:
-            print(f"[SELECT ERROR ACTIVIDAD] {e}")
+            print(f"[SELECT ERROR DASHBOARD STATS] {e}")
         finally:
             cursor.close()
             conn.close()
 
-    # Ordena todo por 'orden' descendente (más reciente primero) y limita a 6
-    eventos.sort(key=lambda x: x['orden'], reverse=True)
-    return jsonify(eventos[:6])
-
+    return jsonify({
+        'ultimos_registros': ultimos_registros,
+        'actividad_reciente': actividad_reciente
+    })
 # ──────────────────────────────────────────
 #  REGISTRAR USUARIO (solo admin)
 # ──────────────────────────────────────────
