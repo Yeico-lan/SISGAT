@@ -571,9 +571,12 @@ def modulo_motos():
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT mot_id, mot_placa, mot_marca, mot_modelo, mot_cilindraje, mot_color, mot_estado, cli_id 
-        FROM motos 
-        ORDER BY mot_id ASC
+        SELECT m.mot_id, m.mot_placa, m.mot_marca, m.mot_modelo,
+               m.mot_cilindraje, m.mot_color, m.mot_estado, m.cli_id,
+               CONCAT(c.cli_nombre, ' ', c.cli_apellido) AS cliente_nombre
+        FROM motos m
+        LEFT JOIN clientes c ON c.cli_id = m.cli_id
+        ORDER BY m.mot_id ASC
     """)
     lista_motos = cursor.fetchall()
 
@@ -616,10 +619,13 @@ def obtener_motos():
         cursor = conn.cursor(dictionary=True)
 
         cursor.execute("""
-            SELECT mot_id, mot_placa, mot_marca, mot_modelo,
-                   mot_cilindraje, mot_color, mot_estado, cli_id
-            FROM motos
-            ORDER BY mot_id ASC
+            SELECT
+                m.mot_id, m.mot_placa, m.mot_marca, m.mot_modelo,
+                m.mot_cilindraje, m.mot_color, m.mot_estado, m.cli_id,
+                CONCAT(c.cli_nombre, ' ', c.cli_apellido) AS cliente_nombre
+            FROM motos m
+            LEFT JOIN clientes c ON c.cli_id = m.cli_id
+            ORDER BY m.mot_id ASC
         """)
 
         return jsonify(cursor.fetchall())
@@ -1192,8 +1198,17 @@ def modulo_ordenes():
         LEFT JOIN usuarios u ON u.usu_id = o.usu_id
         ORDER BY o.ord_id DESC
     """)
-
     ordenes = cursor.fetchall()
+
+    # ── Datos para los selects del formulario ──
+    cursor.execute("SELECT mot_id, mot_placa, mot_marca FROM motos ORDER BY mot_placa ASC")
+    motos = cursor.fetchall()
+
+    cursor.execute("SELECT cli_id, cli_nombre, cli_apellido FROM clientes ORDER BY cli_nombre ASC")
+    clientes = cursor.fetchall()
+
+    cursor.execute("SELECT usu_id, usu_nombre FROM usuarios ORDER BY usu_nombre ASC")
+    usuarios = cursor.fetchall()
 
     cursor.close()
     conn.close()
@@ -1201,6 +1216,9 @@ def modulo_ordenes():
     return render_template(
         'orden_servicios.html',
         ordenes=ordenes,
+        motos=motos,
+        clientes=clientes,
+        usuarios=usuarios,
         nombre=session.get('usuario_nombre'),
         rol=session.get('usuario_rol')
     )

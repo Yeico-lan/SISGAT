@@ -279,7 +279,7 @@
               <td class="px-5 py-3.5 text-sm text-muted">{{ moto.mot_cilindraje }} cc</td>
               <td class="px-5 py-3.5 text-sm text-white">{{ moto.mot_color }}</td>
               <td class="px-5 py-3.5 text-sm text-muted">
-                <span class="bg-black/30 px-2 py-1 rounded border border-white/5 text-xs">ID: {{ moto.cli_id }}</span>
+                <span class="bg-black/30 px-2 py-1 rounded border border-white/5 text-xs">{{ moto.cliente_nombre }}</span>
               </td>
               <td class="px-5 py-3.5 text-sm">
                 {% if moto.mot_estado == 'activo' %}
@@ -749,10 +749,8 @@ function renderTable(data) {
         ${moto.mot_color}
       </td>
 
-      <td class="px-5 py-3.5">
-        <span class="text-brand-muted text-xs border px-2 py-0.5 rounded">
-          CLI-${moto.cli_id}
-        </span>
+      <td class="px-5 py-3.5 text-white/90 font-medium">
+        ${moto.cliente_nombre || 'Sin asignar'}
       </td>
 
       <td class="px-5 py-3.5">

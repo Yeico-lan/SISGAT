@@ -447,7 +447,7 @@
            <select name="moto_id" id="f-moto" required class="field-input w-full pl-[40px] pr-8 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium appearance-none cursor-pointer focus:border-gold/50 outline-none transition-colors">
              <option value="" disabled selected hidden>Seleccionar placa...</option>
              {% for moto in motos %}
-               <option value="{{ moto.mot_id }}" class="bg-bg text-white">{{ moto.mot_placa }} ({ { moto.mot_marca } })</option>
+               <option value="{{ moto.mot_id }}" class="bg-bg text-white">{{ moto.mot_placa }} ({{ moto.mot_marca }})</option>
               {% endfor %}
            </select>
            <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -477,7 +477,7 @@
         <select name="usu_id" id="f-usuario" required class="field-input w-full pl-[40px] pr-8 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium appearance-none cursor-pointer focus:border-gold/50 outline-none transition-colors">
         {% for usuario in usuarios %}
           <option value="{{ usuario.usu_id }}" class="bg-bg text-white" {% if usuario.usu_id == session.get('usuario_id') %}selected{% endif %}>
-            {{ usuario.usu_nombre }} (Tú)
+            {{ usuario.usu_nombre }}
           </option>
         {% endfor %}
         </select>
