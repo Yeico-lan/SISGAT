@@ -401,23 +401,48 @@ def movimientos_page():
 
     conn = get_connection()
     movimientos = []
+    mecanicos = []
+    productos = []
+
     if conn:
         try:
             cursor = conn.cursor(dictionary=True)
+
+            # Obtener movimientos
             cursor.execute("""
                 SELECT m.mov_id, m.mov_tipo, m.mov_motivo,
                        m.mov_fecha, m.prod_id,
                        m.usu_id,
-                       CONCAT(u.usu_nombre, ' ', u.usu_apellido) AS usu_nombre
+                       CONCAT(u.usu_nombre, ' ', u.usu_apellido) AS usu_nombre,
+                       p.prod_nombre
                 FROM movimientos m
-                LEFT JOIN usuarios u ON u.usu_id = m.usu_id
+                LEFT JOIN usuarios u  ON u.usu_id  = m.usu_id
+                LEFT JOIN productos p ON p.prod_id  = m.prod_id
                 ORDER BY m.mov_fecha DESC
             """)
             movimientos = cursor.fetchall()
             # Convertir fechas a string para Jinja2
             for m in movimientos:
-                if m['mov_fecha']:
+                if m.get('mov_fecha'):
                     m['mov_fecha'] = m['mov_fecha'].strftime('%Y-%m-%d')
+
+            # Obtener solo los mecánicos (siempre)
+            cursor.execute("""
+                SELECT usu_id, usu_nombre, usu_apellido
+                FROM usuarios
+                WHERE id_rol = 2
+                ORDER BY usu_nombre ASC
+            """)
+            mecanicos = cursor.fetchall()
+
+            # Obtener productos (siempre)
+            cursor.execute("""
+                SELECT prod_id, prod_nombre
+                FROM productos
+                ORDER BY prod_nombre ASC
+            """)
+            productos = cursor.fetchall()
+
         except Error as e:
             print(f"[SELECT ERROR MOVIMIENTOS] {e}")
         finally:
@@ -426,8 +451,11 @@ def movimientos_page():
 
     return render_template('movimientos.html',
                            movimientos=movimientos,
+                           mecanicos=mecanicos,
+                           productos=productos,
                            nombre=session.get('usuario_nombre'),
                            rol=session.get('usuario_rol'))
+
 
 
 @app.route('/guardar_movimiento', methods=['POST'])
@@ -476,9 +504,11 @@ def api_movimientos():
         cursor.execute("""
             SELECT m.mov_id, m.mov_tipo, m.mov_motivo,
                    CONCAT(u.usu_nombre, ' ', u.usu_apellido) AS usu_nombre,
-                   m.mov_fecha, m.prod_id
+                   m.mov_fecha, m.prod_id,
+                   p.prod_nombre
             FROM movimientos m
-            LEFT JOIN usuarios u ON m.usu_id = u.usu_id
+            LEFT JOIN usuarios u  ON m.usu_id  = u.usu_id
+            LEFT JOIN productos p ON m.prod_id  = p.prod_id
             ORDER BY m.mov_id ASC
         """)
         movimientos = cursor.fetchall()

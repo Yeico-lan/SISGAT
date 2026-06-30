@@ -309,7 +309,7 @@
               <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">mov_tipo</th>
               <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">mov_motivo</th>
               <th class="px-5 py-4 text-left text-[10px] tracking-[2px] uppercase text-muted font-semibold">usu_id (Usuario)</th>
-              <th class="px-5 py-4 text-center text-[10px] tracking-[2px] uppercase text-muted font-semibold">prod_id</th>
+              <th class="px-5 py-4 text-center text-[10px] tracking-[2px] uppercase text-muted font-semibold">producto</th>
             </tr>
           </thead>
           <tbody id="tabla-body">
@@ -345,7 +345,7 @@
               
               <td class="px-5 py-4 text-[13px] text-muted font-semibold">{{ m.usu_nombre }} <span class="text-[11px] text-white/30 font-normal">(ID: {{ m.usu_id }})</span></td>
               
-              <td class="px-5 py-4 text-center font-mono text-[13px] text-gold font-bold">1</td>
+              <td class="px-5 py-4 text-center font-mono text-[13px] text-gold font-bold">{{ m.prod_nombre or '—' }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -416,25 +416,53 @@
             </svg>
           </div>
         </div>
-        <div>
-          <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">USU_ID (ID Encargado)</label>
-          <div class="field-wrap relative">
-            <input type="number" name="usu_id" id="f-usuario" value="{{ session.get('user_id', '') }}" placeholder="ID" class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
-            <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200" viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-        </div>
-        <div class="col-span-2">
-        <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">PROD_ID (Producto)</label>
-        <div class="field-wrap relative">
-          <input type="number" name="prod_id" id="f-producto" placeholder="ID del producto (estático: 1)" 
-                 value="1"
-                 class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[14px] font-medium"/>
-          <svg class="field-icon absolute left-[13px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-all duration-200"
-               viewBox="0 0 24 24" fill="none" stroke="#8b8fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        
+      <div class="mb-4">
+        <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
+        Mecanico
+        </label>
+
+        <div class="relative">
+        <!-- Icono a la izquierda -->
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
           </svg>
+
+    <!-- Select poblado desde DB -->
+          <select name="usu_id" id="usu_id" required
+            class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[15px]">
+            <option value="">Seleccione un mecánico</option>
+            {% for mecanico in mecanicos %}
+              <option value="{{ mecanico.usu_id }}"
+              {% if session.get('user_id') == mecanico.usu_id %} selected {% endif %}>
+              {{ mecanico.usu_nombre }} {{ mecanico.usu_apellido }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      
+      </div>
+        <div class="mb-4">
+        <label class="block text-[11px] tracking-[2px] uppercase text-muted mb-2 font-semibold">
+        Producto
+        </label>
+
+        <div class="relative">
+        <!-- Icono de producto (opcional) -->
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M3 7h18M5 7v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"></path>
+          <path d="M16 3v4M8 3v4"></path>
+          </svg>
+
+        <!-- Select poblado desde DB -->
+          <select name="prod_id" id="prod_id" required
+            class="field-input w-full pl-[40px] pr-4 py-[12px] bg-bg border border-gold/15 rounded-[10px] text-white font-rajdhani text-[15px]">
+            <option value="">Seleccione un producto</option>
+            {% for producto in productos %}
+            <option value="{{ producto.prod_id }}">{{ producto.prod_nombre }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
 
